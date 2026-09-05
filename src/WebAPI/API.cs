@@ -112,7 +112,20 @@ public class API
                 }
                 return;
             }
-            // TODO: Authorization check
+            User user = session?.User ?? WebServer.GetUserFor(context);
+            if (handler.Permission is not null && (user is null || !user.HasPermission(handler.Permission)))
+            {
+                Error($"User lacks required permission '{handler.Permission.ID}' ('{handler.Permission.DisplayName}' in group '{handler.Permission.Group.DisplayName}')");
+                if (socket is not null)
+                {
+                    await context.YieldJsonOutput(socket, 401, Utilities.ErrorObj("You lack permissions for this route.", "bad_permissions"));
+                }
+                else
+                {
+                    context.Response.Redirect("/Error/Permissions");
+                }
+                return;
+            }
             if (handler.IsWebSocket && socket is null)
             {
                 Error("API route is a websocket but request is not");
@@ -131,19 +144,6 @@ public class API
                 if (handler.IsUserUpdate)
                 {
                     session.UpdateLastUsedTime();
-                }
-                if (handler.Permission is not null && !session.User.HasPermission(handler.Permission))
-                {
-                    Error($"User lacks required permission '{handler.Permission.ID}' ('{handler.Permission.DisplayName}' in group '{handler.Permission.Group.DisplayName}')");
-                    if (socket is not null)
-                    {
-                        await context.YieldJsonOutput(socket, 401, Utilities.ErrorObj("You lack permissions for this route.", "bad_permissions"));
-                    }
-                    else
-                    {
-                        context.Response.Redirect("/Error/Permissions");
-                    }
-                    return;
                 }
             }
             JObject output = await handler.Call(context, session, socket, input);
