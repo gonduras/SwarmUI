@@ -1,0 +1,5 @@
+🧪 Add tests for BackendAPI.EditBackend
+
+🎯 What: Added tests for the `EditBackend` method in `BackendAPI.cs` to ensure reliable handling of settings modification and potential failures.
+📊 Coverage: Tested the scenarios where settings are locked, settings are missing from the raw input, the new target ID is already in use, and when the requested backend to edit does not exist.
+✨ Result: Successfully verified error handling mechanisms and prevented regressions in `EditBackend` logic without affecting external data directories by using clean tear downs and scoped local temporary files.
