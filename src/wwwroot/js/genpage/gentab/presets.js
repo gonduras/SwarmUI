@@ -2,11 +2,27 @@
 class PresetHelpers {
 
     constructor() {
+        this.allPresets = [];
+        this.allPresetsUnsorted = [];
+        this.currentPresets = [];
+        this.preset_to_edit = null;
+        this.createNewPresetTitle = translatable('Create New Preset');
+        this.editPresetTitle = translatable('Edit Preset');
+        this.exportingPresets = [];
+
         this.imageBlockElem = getRequiredElementById('new_preset_image_block');
+
         let imageHtml = makeImageInput(null, 'new_preset_image', null, 'Image', 'Image', true, false);
         this.imageBlockElem.innerHTML = imageHtml;
         this.imageElem = getRequiredElementById('new_preset_image');
         this.enableImageElem = getRequiredElementById('new_preset_image_toggle');
+        this.importPresetUploadContainer = getRequiredElementById('import_preset_upload_container');
+
+        this.presetBrowser = new GenPageBrowserClass('preset_list', listPresetFolderAndFiles, 'presetbrowser', 'Cards', describePreset, selectPreset,
+            `<button id="preset_list_create_new_button translate" class="refresh-button" onclick="create_new_preset_button()">Create New Preset</button>
+            <button id="preset_list_import_button translate" class="refresh-button" onclick="importPresetsButton()">Import Presets</button>
+            <button id="preset_list_export_button translate" class="refresh-button" onclick="exportPresetsButton()">Export All Presets</button>
+            <button id="preset_list_apply_button translate" class="refresh-button" onclick="apply_presets()" title="Apply all current presets directly to your parameter list.">Apply Presets</button>`);
     }
 }
 
@@ -15,11 +31,6 @@ let presetHelpers = new PresetHelpers();
 
 //////////// TODO: Merge all the below into the class above
 
-let allPresets = [];
-let allPresetsUnsorted = [];
-let currentPresets = [];
-
-let preset_to_edit = null;
 
 function fixPresetParamClickables() {
     for (let param of gen_param_types) {
@@ -29,7 +40,7 @@ function fixPresetParamClickables() {
 
 function getPresetByTitle(title) {
     title = title.toLowerCase();
-    return allPresets.find(p => p.title.toLowerCase() == title);
+    return presetHelpers.allPresets.find(p => p.title.toLowerCase() == title);
 }
 
 function getPresetTypes(prefix) {
@@ -37,7 +48,7 @@ function getPresetTypes(prefix) {
 }
 
 function clearPresetView() {
-    preset_to_edit = null;
+    presetHelpers.preset_to_edit = null;
     getRequiredElementById('preset_advanced_options_checkbox').checked = false;
     preset_toggle_advanced();
     getRequiredElementById('new_preset_name').value = '';
@@ -75,13 +86,11 @@ function clearPresetView() {
     }
 }
 
-let createNewPresetTitle = translatable('Create New Preset');
-let editPresetTitle = translatable('Edit Preset');
 
 function create_new_preset_button() {
     clearPresetView();
-    getRequiredElementById('new_preset_name').value = presetBrowser.folder;
-    getRequiredElementById('new_preset_modal_title').innerText = createNewPresetTitle.get();
+    getRequiredElementById('new_preset_name').value = presetHelpers.presetBrowser.folder;
+    getRequiredElementById('new_preset_modal_title').innerText = presetHelpers.createNewPresetTitle.get();
     let curImg = document.getElementById('current_image_img');
     presetHelpers.enableImageElem.checked = false;
     let run = () => {
@@ -138,10 +147,10 @@ function save_new_preset() {
         return;
     }
     let toSend = { title: name, description: description, param_map: data };
-    if (preset_to_edit) {
-        toSend['preview_image'] = preset_to_edit.preview_image;
+    if (presetHelpers.preset_to_edit) {
+        toSend['preview_image'] = presetHelpers.preset_to_edit.preview_image;
         toSend['is_edit'] = true;
-        toSend['editing'] = preset_to_edit.title;
+        toSend['editing'] = presetHelpers.preset_to_edit.title;
     }
     let complete = () => {
         genericRequest('AddNewPreset', toSend, data => {
@@ -206,16 +215,16 @@ function updatePresetList() {
         }
     }
     let overrideCount = 0;
-    for (let preset of currentPresets) {
+    for (let preset of presetHelpers.currentPresets) {
         let div = createDiv(null, 'preset-in-list');
         div.innerText = preset.title;
         let removeButton = createDiv(null, 'preset-remove-button');
         removeButton.innerHTML = '&times;';
         removeButton.title = "Remove this preset";
         removeButton.addEventListener('click', () => {
-            currentPresets.splice(currentPresets.indexOf(preset), 1);
+            presetHelpers.currentPresets.splice(presetHelpers.currentPresets.indexOf(preset), 1);
             updatePresetList();
-            presetBrowser.rerender();
+            presetHelpers.presetBrowser.rerender();
         });
         div.appendChild(removeButton);
         view.appendChild(div);
@@ -233,9 +242,9 @@ function updatePresetList() {
             }
         }
     }
-    localStorage.setItem('current_presets', currentPresets.map(p => p.title).join('|||'));
-    getRequiredElementById('current_presets_wrapper').style.display = currentPresets.length > 0 ? 'inline-block' : 'none';
-    getRequiredElementById('preset_info_slot').innerText = ` (${currentPresets.length}, overriding ${overrideCount} params)`;
+    localStorage.setItem('current_presets', presetHelpers.currentPresets.map(p => p.title).join('|||'));
+    getRequiredElementById('current_presets_wrapper').style.display = presetHelpers.currentPresets.length > 0 ? 'inline-block' : 'none';
+    getRequiredElementById('preset_info_slot').innerText = ` (${presetHelpers.currentPresets.length}, overriding ${overrideCount} params)`;
     setTimeout(() => {
         genTabLayout.reapplyPositions();
     }, 1);
@@ -244,9 +253,9 @@ function updatePresetList() {
 function selectInitialPresetList() {
     let presetList = localStorage.getItem('current_presets');
     if (presetList) {
-        currentPresets = presetList.split('|||').map(p => getPresetByTitle(p)).filter(p => p);
+        presetHelpers.currentPresets = presetList.split('|||').map(p => getPresetByTitle(p)).filter(p => p);
         updatePresetList();
-        presetBrowser.rerender();
+        presetHelpers.presetBrowser.rerender();
     }
 }
 
@@ -284,12 +293,12 @@ function applyOnePreset(preset) {
 }
 
 function apply_presets() {
-    for (let preset of currentPresets) {
+    for (let preset of presetHelpers.currentPresets) {
         applyOnePreset(preset);
     }
-    currentPresets = [];
+    presetHelpers.currentPresets = [];
     updatePresetList();
-    presetBrowser.rerender();
+    presetHelpers.presetBrowser.rerender();
 }
 
 function duplicatePreset(preset) {
@@ -300,11 +309,11 @@ function duplicatePreset(preset) {
 
 function editPreset(preset) {
     clearPresetView();
-    preset_to_edit = preset;
+    presetHelpers.preset_to_edit = preset;
     presetHelpers.enableImageElem.checked = false;
     getRequiredElementById('new_preset_name').value = preset.title;
     getRequiredElementById('preset_description').value = preset.description;
-    getRequiredElementById('new_preset_modal_title').innerText = editPresetTitle.get();
+    getRequiredElementById('new_preset_modal_title').innerText = presetHelpers.editPresetTitle.get();
     for (let key of Object.keys(preset.param_map)) {
         let type = gen_param_types.filter(p => p.id == key)[0];
         if (type) {
@@ -350,15 +359,15 @@ function presetSortCompare(sortBy, a, b) {
 function sortPresets() {
     let sortBy = localStorage.getItem('preset_list_sort_by') || 'Default';
     let reverse = localStorage.getItem('preset_list_sort_reverse') == 'true';
-    let preList = allPresetsUnsorted.filter(p => p.title.toLowerCase() == "default" || p.title.toLowerCase() == "preview");
-    let mainList = allPresetsUnsorted.filter(p => p.title.toLowerCase() != "default" && p.title.toLowerCase() != "preview");
+    let preList = presetHelpers.allPresetsUnsorted.filter(p => p.title.toLowerCase() == "default" || p.title.toLowerCase() == "preview");
+    let mainList = presetHelpers.allPresetsUnsorted.filter(p => p.title.toLowerCase() != "default" && p.title.toLowerCase() != "preview");
     if (sortBy != 'Default') {
         mainList.sort((a, b) => presetSortCompare(sortBy, a, b));
     }
     if (reverse) {
         mainList.reverse();
     }
-    allPresets = preList.concat(mainList);
+    presetHelpers.allPresets = preList.concat(mainList);
 }
 
 function listPresetFolderAndFiles(path, isRefresh, callback, depth) {
@@ -370,11 +379,11 @@ function listPresetFolderAndFiles(path, isRefresh, callback, depth) {
             let sortReverseElem = document.getElementById('preset_list_sort_reverse');
             sortElem.addEventListener('change', () => {
                 localStorage.setItem('preset_list_sort_by', sortElem.value);
-                presetBrowser.lightRefresh();
+                presetHelpers.presetBrowser.lightRefresh();
             });
             sortReverseElem.addEventListener('change', () => {
                 localStorage.setItem('preset_list_sort_reverse', sortReverseElem.checked);
-                presetBrowser.lightRefresh();
+                presetHelpers.presetBrowser.lightRefresh();
             });
         }
     }
@@ -383,7 +392,7 @@ function listPresetFolderAndFiles(path, isRefresh, callback, depth) {
         let folders = [];
         let files = [];
         sortPresets();
-        for (let preset of allPresets) {
+        for (let preset of presetHelpers.allPresets) {
             if (preset.title.startsWith(prefix)) {
                 let subPart = preset.title.substring(prefix.length);
                 let slashes = subPart.split('/').length - 1;
@@ -409,7 +418,7 @@ function listPresetFolderAndFiles(path, isRefresh, callback, depth) {
     };
     if (isRefresh) {
         genericRequest('GetMyUserData', {}, data => {
-            allPresetsUnsorted = data.presets;
+            presetHelpers.allPresetsUnsorted = data.presets;
             proc();
         });
     }
@@ -435,7 +444,7 @@ function describePreset(preset) {
     ];
     let paramText = Object.keys(preset.data.param_map).map(key => `${key}: ${preset.data.param_map[key]}`);
     let description = `${preset.data.title}:\n${preset.data.description}\n\n${paramText.join('\n')}`;
-    let className = currentPresets.some(p => p.title == preset.data.title) ? 'preset-block-selected preset-block' : 'preset-block';
+    let className = presetHelpers.currentPresets.some(p => p.title == preset.data.title) ? 'preset-block-selected preset-block' : 'preset-block';
     let name = preset.data.title;
     let index = name.lastIndexOf('/');
     if (index != -1) {
@@ -465,28 +474,22 @@ function describePreset(preset) {
 }
 
 function selectPreset(preset) {
-    if (!currentPresets.some(p => p.title == preset.data.title)) {
-        currentPresets.push(preset.data);
+    if (!presetHelpers.currentPresets.some(p => p.title == preset.data.title)) {
+        presetHelpers.currentPresets.push(preset.data);
     }
     else {
-        currentPresets.splice(currentPresets.indexOf(preset.data), 1);
+        presetHelpers.currentPresets.splice(presetHelpers.currentPresets.indexOf(preset.data), 1);
     }
     updatePresetList();
-    presetBrowser.rerender();
+    presetHelpers.presetBrowser.rerender();
 }
 
 function clearPresets() {
-    currentPresets = [];
+    presetHelpers.currentPresets = [];
     updatePresetList();
-    presetBrowser.rerender();
+    presetHelpers.presetBrowser.rerender();
 }
 
-let presetBrowser = new GenPageBrowserClass('preset_list', listPresetFolderAndFiles, 'presetbrowser', 'Cards', describePreset, selectPreset,
-    `<label for="preset_list_sort_by">Sort:</label> <select id="preset_list_sort_by"><option>Default</option><option>Name</option><option>Path</option></select> <input type="checkbox" id="preset_list_sort_reverse"> <label for="preset_list_sort_reverse">Reverse</label>
-    <button id="preset_list_create_new_button translate" class="refresh-button" onclick="create_new_preset_button()">Create New Preset</button>
-    <button id="preset_list_import_button translate" class="refresh-button" onclick="importPresetsButton()">Import Presets</button>
-    <button id="preset_list_export_button translate" class="refresh-button" onclick="exportPresetsButton()">Export All Presets</button>
-    <button id="preset_list_apply_button translate" class="refresh-button" onclick="apply_presets()" title="Apply all current presets directly to your parameter list.">Apply Presets</button>`);
 
 function importPresetsButton() {
     getRequiredElementById('import_presets_textarea').value = '';
@@ -631,21 +634,20 @@ function importPresetUpload() {
     });
 }
 
-let importPresetUploadContainer = getRequiredElementById('import_preset_upload_container');
 
-importPresetUploadContainer.addEventListener('dragover', e => {
+presetHelpers.importPresetUploadContainer.addEventListener('dragover', e => {
     e.preventDefault();
     e.stopPropagation();
 }, false);
-importPresetUploadContainer.addEventListener('dragenter', e => {
+presetHelpers.importPresetUploadContainer.addEventListener('dragenter', e => {
     e.preventDefault();
     e.stopPropagation();
 }, false);
-importPresetUploadContainer.addEventListener('dragleave', e => {
+presetHelpers.importPresetUploadContainer.addEventListener('dragleave', e => {
     e.preventDefault();
     e.stopPropagation();
 }, false);
-importPresetUploadContainer.addEventListener('drop', e => {
+presetHelpers.importPresetUploadContainer.addEventListener('drop', e => {
     e.preventDefault();
     e.stopPropagation();
     readFileText(e.dataTransfer.files[0], text => {
@@ -683,7 +685,7 @@ function importPresetsCheck() {
     }
     let willBreak = [];
     for (let key of Object.keys(data)) {
-        if (allPresets.some(p => p.title == key)) {
+        if (presetHelpers.allPresets.some(p => p.title == key)) {
             willBreak.push(key);
         }
     }
@@ -735,28 +737,27 @@ function importPresetsActivate() {
     }
 }
 
-exportingPresets = [];
 
 function exportOnePresetButton(preset) {
-    exportingPresets = [preset];
+    presetHelpers.exportingPresets = [preset];
     exportPresetsButton(true);
 }
 
 function exportPresetsButton(reuse = false) {
     if (!reuse) {
-        exportingPresets = allPresets;
+        presetHelpers.exportingPresets = presetHelpers.allPresets;
     }
     let text = '';
     if (getRequiredElementById('export_preset_format_json').checked) {
         let data = {};
-        for (let preset of exportingPresets) {
+        for (let preset of presetHelpers.exportingPresets) {
             data[preset.title] = preset;
         }
         text = JSON.stringify(data, null, 4);
     }
     else { // CSV
         text = 'name,prompt,negative_prompt,\n';
-        for (let preset of exportingPresets) {
+        for (let preset of presetHelpers.exportingPresets) {
             if (preset.param_map.prompt || preset.param_map.negativeprompt) {
                 text += `"${preset.title.replace('"', '""')}","${(preset.param_map.prompt || '').replaceAll('"', '""')}","${(preset.param_map.negativeprompt || '').replaceAll('"', '""')}",\n`;
             }

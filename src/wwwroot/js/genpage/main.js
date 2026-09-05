@@ -372,9 +372,9 @@ function loadUserData(callback) {
         if (!language) {
             language = data.language;
         }
-        allPresetsUnsorted = data.presets;
+        presetHelpers.allPresetsUnsorted = data.presets;
         sortPresets();
-        presetBrowser.lightRefresh();
+        presetHelpers.presetBrowser.lightRefresh();
         if (shouldApplyDefault) {
             shouldApplyDefault = false;
             let defaultPreset = getPresetByTitle('default');

@@ -67,7 +67,7 @@ function genOnePreview() {
         return;
     }
     lastPreviewParams = allParams;
-    let previewPreset = allPresets.find(p => p.title == 'Preview');
+    let previewPreset = presetHelpers.allPresets.find(p => p.title == 'Preview');
     let input_overrides = {};
     if (previewPreset) {
         for (let key of Object.keys(previewPreset.param_map)) {
@@ -116,7 +116,7 @@ getRequiredElementById('alt_prompt_textbox').addEventListener('input', () => nee
 
 function toggleGeneratePreviews(override_preview_req = false) {
     if (!isGeneratingPreviews) {
-        let previewPreset = allPresets.find(p => p.title == 'Preview');
+        let previewPreset = presetHelpers.allPresets.find(p => p.title == 'Preview');
         if (!previewPreset && !override_preview_req) {
             let autoButtonArea = getRequiredElementById('gen_previews_autobutton');
             let lcm = coreModelMap['LoRA'].find(m => m.toLowerCase().includes('sdxl_lcm'));
