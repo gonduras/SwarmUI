@@ -744,7 +744,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
         return workflow;
     }
 
-    public static string CreateWorkflow(T2IParamInput user_input, Func<string, string> initImageFixer, string ModelFolderFormat = null, HashSet<string> features = null)
+    public static async Task<string> CreateWorkflow(T2IParamInput user_input, Func<string, Task<string>> initImageFixer, string ModelFolderFormat = null, HashSet<string> features = null)
     {
         // note: gently break any standard embed with a space, *require* swarm format embeds, as comfy's raw syntax has unwanted behaviors
         user_input.ProcessPromptEmbeds(x => $" embedding:{x.Replace("/", ModelFolderFormat)} ", p => p.Replace("embedding:", "embedding :", StringComparison.OrdinalIgnoreCase));
@@ -752,7 +752,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
         if (workflow is not null && !user_input.Get(T2IParamTypes.ControlNetPreviewOnly))
         {
             Logs.Verbose("Will fill a workflow...");
-            workflow = StringConversionHelper.QuickSimpleTagFiller(initImageFixer(workflow), "${", "}", (tag) => {
+            workflow = StringConversionHelper.QuickSimpleTagFiller(await initImageFixer(workflow), "${", "}", (tag) => {
                 string fixedTag = Utilities.UnescapeJsonString(tag);
                 string tagName = fixedTag.BeforeAndAfter(':', out string defVal);
                 string tagBasic = tagName.BeforeAndAfter('+', out string tagExtra);
@@ -841,7 +841,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
         else
         {
             workflow = new WorkflowGenerator() { UserInput = user_input, ModelFolderFormat = ModelFolderFormat, Features = features ?? [] }.Generate().ToString();
-            workflow = initImageFixer(workflow);
+            workflow = await initImageFixer(workflow);
         }
         return workflow;
     }
@@ -858,9 +858,9 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
     public override async Task GenerateLive(T2IParamInput user_input, string batchId, Action<object> takeOutput)
     {
         List<Action> completeSteps = [];
-        string initImageFixer(string workflow) // This is a hack, backup for if Swarm nodes are missing
+        async Task<string> initImageFixer(string workflow) // This is a hack, backup for if Swarm nodes are missing
         {
-            void TryApply(string key, ImageFile img, bool resize)
+            async Task TryApply(string key, ImageFile img, bool resize)
             {
                 int width = user_input.GetImageWidth(-1), height = user_input.GetImageHeight(-1);
                 if (width <= 0 || height <= 0)
@@ -890,7 +890,7 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                         { new ByteArrayContent(fixedImage.RawData), "image", fname },
                         { new StringContent("true"), "overwrite" }
                     };
-                    HttpClient.PostAsync($"{APIAddress}/upload/image", content).Wait();
+                    await HttpClient.PostAsync($"{APIAddress}/upload/image", content);
                     completeSteps.Add(() =>
                     {
                         if (!RemoveInputFile(fname))
@@ -907,19 +907,19 @@ public abstract class ComfyUIAPIAbstractBackend : AbstractT2IBackend
                 bool resize = !T2IParamTypes.TryGetType(key, out T2IParamType type, user_input) || type.ImageShouldResize;
                 if (val is ImageFile img && !type.ImageAlwaysB64)
                 {
-                    TryApply(key, img, resize);
+                    await TryApply(key, img, resize);
                 }
                 else if (val is List<Image> imgs && !type.ImageAlwaysB64)
                 {
                     for (int i = 0; i < imgs.Count; i++)
                     {
-                        TryApply(key + "." + i, imgs[i], resize);
+                        await TryApply(key + "." + i, imgs[i], resize);
                     }
                 }
             }
             return workflow;
         }
-        string workflow = CreateWorkflow(user_input, initImageFixer, ModelFolderFormat, [.. SupportedFeatures]);
+        string workflow = await CreateWorkflow(user_input, initImageFixer, ModelFolderFormat, [.. SupportedFeatures]);
         try
         {
             await AwaitJobLive(workflow, batchId, takeOutput, user_input, user_input.InterruptToken);
