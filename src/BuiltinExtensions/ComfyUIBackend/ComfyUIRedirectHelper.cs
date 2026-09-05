@@ -128,14 +128,16 @@ public class ComfyUIRedirectHelper
     public static volatile JObject LastObjectInfo;
 
     /// <summary>Cache handler to prevent "object_info" reads from spamming and killing the comfy backend (which handles them sequentially, and rather slowly per call).</summary>
-    public static SingleValueExpiringCacheAsync<JObject> ObjectInfoReadCacher = new(() =>
+    public static SingleValueExpiringCacheAwaitableAsync<JObject> ObjectInfoReadCacher = new(async () =>
     {
         ComfyUIBackendExtension.ComfyBackendData backend = ComfyUIBackendExtension.ComfyBackendsDirect().First();
         JObject result = null;
         try
         {
             using CancellationTokenSource cancel = Utilities.TimedCancel(TimeSpan.FromMinutes(1));
-            result = backend.Client.GetAsync($"{backend.APIAddress}/object_info", cancel.Token).Result.Content.ReadAsStringAsync().Result.ParseToJson();
+            HttpResponseMessage response = await backend.Client.GetAsync($"{backend.APIAddress}/object_info", cancel.Token);
+            string content = await response.Content.ReadAsStringAsync();
+            result = content.ParseToJson();
         }
         catch (Exception ex)
         {
@@ -615,7 +617,7 @@ public class ComfyUIRedirectHelper
             }
             else if ((path == "object_info" || path.StartsWith("object_info?") || path == "api/object_info" || path.StartsWith("api/object_info?")) && Program.ServerSettings.Performance.DoBackendDataCache)
             {
-                JObject data = ObjectInfoReadCacher.GetValue();
+                JObject data = await ObjectInfoReadCacher.GetValue();
                 if (data is null)
                 {
                     ObjectInfoReadCacher.ForceExpire();
