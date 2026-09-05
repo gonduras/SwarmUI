@@ -158,6 +158,11 @@ public static class T2IAPI
         [API.APIParameter("Raw mapping of input should contain general T2I parameters (see listing on Generate tab of main interface) to values, eg `{ \"prompt\": \"a photo of a cat\", \"model\": \"OfficialStableDiffusion/sd_xl_base_1.0\", \"steps\": 20, ... }`. Note that this is the root raw map, ie all params go on the same level as `images`, `session_id`, etc.\nThe key 'extra_metadata' may be used to apply extra internal metadata as a JSON string:string map.")] JObject rawInput)
     {
         List<JObject> outputs = await API.RunWebsocketHandlerCallDirect(GenT2I_Internal, session, (images, rawInput, new SharedGenT2IData(), 0));
+        return ProcessGenerateText2ImageResults(outputs);
+    }
+
+    public static JObject ProcessGenerateText2ImageResults(List<JObject> outputs)
+    {
         Dictionary<int, string> imageOutputs = [];
         int[] discards = null;
         foreach (JObject obj in outputs)
