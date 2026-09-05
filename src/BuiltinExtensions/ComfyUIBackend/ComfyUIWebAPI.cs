@@ -151,7 +151,7 @@ public static class ComfyUIWebAPI
             }
             string format = backend.SupportedFeatures.Contains("folderbackslash") ? "\\" : "/";
             Logs.Verbose($"ComfyGetWorkflow for input: {input}");
-            string flow = ComfyUIAPIAbstractBackend.CreateWorkflow(input, w => w, format, features: [.. backend.SupportedFeatures]);
+            string flow = await ComfyUIAPIAbstractBackend.CreateWorkflow(input, w => Task.FromResult(w), format, features: [.. backend.SupportedFeatures]);
             return new JObject() { ["workflow"] = flow };
         }
         catch (SwarmReadableErrorException ex)
