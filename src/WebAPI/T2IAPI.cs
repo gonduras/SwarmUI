@@ -483,14 +483,7 @@ public static class T2IAPI
         return new() { ["images"] = new JArray() { new JObject() { ["image"] = path, ["batch_index"] = "0", ["request_id"] = $"{user_input.UserRequestId}", ["metadata"] = metadata } } };
     }
 
-    public static HashSet<string> HistoryExtensions = // TODO: Use MediaType?
-    [
-        "png", "jpg", // image
-        "html", // special
-        "gif", "webp", // animation
-        "webm", "mp4", "mov", // video
-        "mp3", "aac", "wav", "flac" // audio
-    ];
+    public static HashSet<string> HistoryExtensions = [.. MediaType.TypesByExtension.Keys, "html"];
 
     public enum ImageHistorySortMode { Name, Date }
 
