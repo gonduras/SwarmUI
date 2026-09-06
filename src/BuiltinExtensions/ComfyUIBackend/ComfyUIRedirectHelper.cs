@@ -135,7 +135,8 @@ public class ComfyUIRedirectHelper
         try
         {
             using CancellationTokenSource cancel = Utilities.TimedCancel(TimeSpan.FromMinutes(1));
-            result = backend.Client.GetAsync($"{backend.APIAddress}/object_info", cancel.Token).Result.Content.ReadAsStringAsync().Result.ParseToJson();
+            HttpResponseMessage res = backend.Client.GetAsync($"{backend.APIAddress}/object_info", cancel.Token).GetAwaiter().GetResult();
+            result = res.Content.ReadAsStringAsync().GetAwaiter().GetResult().ParseToJson();
         }
         catch (Exception ex)
         {
@@ -582,8 +583,8 @@ public class ComfyUIRedirectHelper
                     dupRequest.Content.Headers.Add("Content-Type", context.Request.ContentType);
                     tasks.Add(webClient.SendAsync(dupRequest));
                 }
-                await Task.WhenAll(tasks);
-                List<HttpResponseMessage> responses = [.. tasks.Select(t => t.Result)];
+                HttpResponseMessage[] responsesArray = await Task.WhenAll(tasks);
+                List<HttpResponseMessage> responses = [.. responsesArray];
                 response = responses.FirstOrDefault(t => t.StatusCode == HttpStatusCode.OK);
                 response ??= responses.FirstOrDefault();
             }
@@ -610,8 +611,8 @@ public class ComfyUIRedirectHelper
                 {
                     requests.Add(localBack.Client.SendAsync(new(new(context.Request.Method), $"{localBack.WebAddress}/{path}")));
                 }
-                await Task.WhenAll(requests);
-                response = requests.Select(r => r.Result).FirstOrDefault(r => r.StatusCode == HttpStatusCode.OK) ?? requests.First().Result;
+                HttpResponseMessage[] responsesArray = await Task.WhenAll(requests);
+                response = responsesArray.FirstOrDefault(r => r.StatusCode == HttpStatusCode.OK) ?? responsesArray.First();
             }
             else if ((path == "object_info" || path.StartsWith("object_info?") || path == "api/object_info" || path.StartsWith("api/object_info?")) && Program.ServerSettings.Performance.DoBackendDataCache)
             {
