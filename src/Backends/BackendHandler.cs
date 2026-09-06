@@ -457,7 +457,7 @@ public class BackendHandler
         LoadInternal();
         NewBackendInitSignal.Set();
         ReassignLoadedModelsList();
-        new Thread(new ThreadStart(RequestHandlingLoop)).Start();
+        _ = Utilities.RunCheckedTask(RequestHandlingLoop);
     }
 
     /// <summary>If true, backends handler is still loading.</summary>
@@ -1084,7 +1084,7 @@ public class BackendHandler
     public static Utilities.ChunkedTimer BackendQueueTimer = new();
 
     /// <summary>Primary internal loop thread to handles tracking of backend requests.</summary>
-    public void RequestHandlingLoop()
+    public async Task RequestHandlingLoop()
     {
         Logs.Init("Backend request handler loop ready...");
         long lastUpdate = Environment.TickCount64;
@@ -1175,7 +1175,7 @@ public class BackendHandler
                 }
                 if (empty || !anyMoved)
                 {
-                    CheckBackendsSignal.WaitAsync(TimeSpan.FromSeconds(1), Program.GlobalProgramCancel).Wait();
+                    await CheckBackendsSignal.WaitAsync(TimeSpan.FromSeconds(1), Program.GlobalProgramCancel);
                 }
                 if (MonitorTimes)
                 {
@@ -1188,11 +1188,11 @@ public class BackendHandler
                 Logs.Error($"Backend handler loop error: {ex.ReadableString()}");
                 if (Program.GlobalProgramCancel.IsCancellationRequested)
                 {
-                    Task.Delay(500).Wait();
+                    await Task.Delay(500);
                 }
                 else
                 {
-                    Task.Delay(2000, Program.GlobalProgramCancel).Wait(); // Delay a bit to be safe in case of repeating errors.
+                    await Task.Delay(2000, Program.GlobalProgramCancel); // Delay a bit to be safe in case of repeating errors.
                 }
             }
         }
