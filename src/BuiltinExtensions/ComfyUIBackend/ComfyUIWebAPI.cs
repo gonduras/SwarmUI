@@ -145,7 +145,7 @@ public static class ComfyUIWebAPI
             ComfyUIAPIAbstractBackend backend = ComfyUIBackendExtension.ComfyBackendsDirect().FirstOrDefault().Backend as ComfyUIAPIAbstractBackend;
             if (backend is null)
             {
-                SwarmSwarmBackend remoteBackend = Program.Backends.RunningBackendsOfType<SwarmSwarmBackend>().Where(s => s.LinkedRemoteBackendType is not null && s.LinkedRemoteBackendType.StartsWith("comfyui_")).FirstOrDefault()
+                SwarmSwarmBackend remoteBackend = BackendHandler.Instance.RunningBackendsOfType<SwarmSwarmBackend>().Where(s => s.LinkedRemoteBackendType is not null && s.LinkedRemoteBackendType.StartsWith("comfyui_")).FirstOrDefault()
                     ?? throw new SwarmReadableErrorException("No ComfyUI backend available.");
                 return await remoteBackend.SendAPIJSON("ComfyGetGeneratedWorkflow", rawInput);
             }
@@ -163,7 +163,7 @@ public static class ComfyUIWebAPI
     /// <summary>API route to read the node types for a specific backend.</summary>
     public static async Task<JObject> ComfyGetNodeTypesForBackend(Session session, int backend)
     {
-        if (Program.Backends.T2IBackends.TryGetValue(backend, out BackendHandler.T2IBackendData data) && data.Backend is ComfyUIAPIAbstractBackend comfyBack)
+        if (BackendHandler.Instance.T2IBackends.TryGetValue(backend, out BackendHandler.T2IBackendData data) && data.Backend is ComfyUIAPIAbstractBackend comfyBack)
         {
             return new JObject() { ["node_types"] = JArray.FromObject(comfyBack.NodeTypes.ToList()) };
         }
@@ -186,7 +186,7 @@ public static class ComfyUIWebAPI
         await MultiInstallLock.WaitAsync(Program.GlobalProgramCancel);
         try
         {
-            ComfyUISelfStartBackend backend = Program.Backends.RunningBackendsOfType<ComfyUISelfStartBackend>().FirstOrDefault();
+            ComfyUISelfStartBackend backend = BackendHandler.Instance.RunningBackendsOfType<ComfyUISelfStartBackend>().FirstOrDefault();
             if (backend is null)
             {
                 Logs.Warning($"User {session.User.UserID} tried to install feature '{features}' but have no comfy self-start backends.");
@@ -223,7 +223,7 @@ public static class ComfyUIWebAPI
             }
             foreach (ComfyUISelfStartBackend backendToStart in backendsToStart)
             {
-                Program.Backends.DoInitBackend(backendToStart.BackendData);
+                BackendHandler.Instance.DoInitBackend(backendToStart.BackendData);
             }
             return new JObject() { ["success"] = true };
         }

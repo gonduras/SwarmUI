@@ -3,6 +3,7 @@ using FreneticUtilities.FreneticToolkit;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Accounts;
 using SwarmUI.Core;
+using SwarmUI.Backends;
 using SwarmUI.Media;
 using SwarmUI.Utils;
 using System.IO;
@@ -709,11 +710,11 @@ public class T2IParamTypes
             "Normal", IgnoreIf: "Normal", GetValues: (_) => ["None", "Normal///Normal (fire 'Every Gen')", "Manual///Manual (fire 'Every Gen' and 'Manual' for each image)", "Manual At End///Manual At End (fire 'Every Gen', then one 'Manual' for the full set of queued gens)"], IsAdvanced: true, AlwaysRetain: true, Group: GroupSwarmInternal, OrderPriority: -12
             ));
         BackendType = Register<string>(new("[Internal] Backend Type", "Which SwarmUI backend type should be used for this request.",
-            "Any", IgnoreIf: "Any", GetValues: (_) => ["Any", .. Program.Backends.BackendTypes.Values.Select(b => $"{b.ID}///{b.Name}")],
+            "Any", IgnoreIf: "Any", GetValues: (_) => ["Any", .. BackendHandler.Instance.BackendTypes.Values.Select(b => $"{b.ID}///{b.Name}")],
             IsAdvanced: true, Permission: Permissions.ParamBackendType, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -10
             ));
         ExactBackendID = Register<string>(new("Exact Backend ID", "Manually force a specific exact backend (by ID #) to be used for this generation.",
-            "0", GetValues: _ => [.. Program.Backends.T2IBackends.Values.OrderBy(v => v.ID >= 0 ? v.ID : v.ID + 999999).Select(v => $"{v.ID}///{v.ID}: {v.Backend.Title}")], Toggleable: true, IsAdvanced: true, ViewType: ParamViewType.BIG, Permission: Permissions.ParamBackendID, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -9
+            "0", GetValues: _ => [.. BackendHandler.Instance.T2IBackends.Values.OrderBy(v => v.ID >= 0 ? v.ID : v.ID + 999999).Select(v => $"{v.ID}///{v.ID}: {v.Backend.Title}")], Toggleable: true, IsAdvanced: true, ViewType: ParamViewType.BIG, Permission: Permissions.ParamBackendID, Group: GroupSwarmInternal, AlwaysRetain: true, OrderPriority: -9
             ));
         WildcardSeed = Register<long>(new("Wildcard Seed", "Wildcard selection seed.\nIf enabled, this seed will be used for selecting entries from wildcards.\nIf disabled, the image seed will be used.\n-1 = random.",
             "-1", Min: -1, Max: uint.MaxValue, Step: 1, Toggleable: true, Examples: ["1", "2", "...", "10"], ViewType: ParamViewType.SEED, Group: GroupSwarmInternal, AlwaysRetain: true, ChangeWeight: -4, OrderPriority: -5

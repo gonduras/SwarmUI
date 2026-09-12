@@ -6,6 +6,7 @@ using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Accounts;
 using SwarmUI.Core;
+using SwarmUI.Backends;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 using System.IO;
@@ -455,8 +456,8 @@ public static class AdminAPI
     [API.APINonfinalMark]
     public static async Task<JObject> GetGlobalStatus(Session session)
     {
-        JObject backendStatus = Program.Backends.CurrentBackendStatus.GetValue();
-        string[] features = [.. Program.Backends.GetAllSupportedFeatures()];
+        JObject backendStatus = BackendHandler.Instance.CurrentBackendStatus.GetValue();
+        string[] features = [.. BackendHandler.Instance.GetAllSupportedFeatures()];
         Interlocked.MemoryBarrier();
         int totalWaitingGens = 0;
         int totalLoadingModels = 0;
