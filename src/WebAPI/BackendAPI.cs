@@ -46,7 +46,7 @@ public class BackendAPI
         """)]
     public static async Task<JObject> ListBackendTypes(Session session)
     {
-        return new() { ["list"] = JToken.FromObject(Program.Backends.BackendTypes.Values.Select(b => b.NetDescription).ToList()) };
+        return new() { ["list"] = JToken.FromObject(BackendHandler.Instance.BackendTypes.Values.Select(b => b.NetDescription).ToList()) };
     }
 
     /// <summary>Create a network object to represent a backend cleanly.</summary>
@@ -90,7 +90,7 @@ public class BackendAPI
         {
             return new() { ["error"] = "Settings are locked." };
         }
-        if (await Program.Backends.DeleteById(backend_id))
+        if (await BackendHandler.Instance.DeleteById(backend_id))
         {
             return new JObject() { ["result"] = "Deleted." };
         }
@@ -112,7 +112,7 @@ public class BackendAPI
         {
             return new() { ["error"] = "Settings are locked." };
         }
-        if (!Program.Backends.T2IBackends.TryGetValue(backend_id, out BackendHandler.T2IBackendData backend))
+        if (!BackendHandler.Instance.T2IBackends.TryGetValue(backend_id, out BackendHandler.T2IBackendData backend))
         {
             return new() { ["error"] = $"Invalid backend ID {backend_id}" };
         }
@@ -122,7 +122,7 @@ public class BackendAPI
         }
         backend.Backend.IsEnabled = enabled;
         backend.Backend.ShutDownReserve = true;
-        Program.Backends.BackendsEdited = true;
+        BackendHandler.Instance.BackendsEdited = true;
         while (backend.CheckIsInUse && backend.Backend.MaxUsages > 0)
         {
             if (Program.GlobalProgramCancel.IsCancellationRequested)
@@ -138,7 +138,7 @@ public class BackendAPI
         if (enabled)
         {
             backend.Backend.Status = BackendStatus.WAITING;
-            Program.Backends.BackendsToInit.Enqueue(backend);
+            BackendHandler.Instance.BackendsToInit.Enqueue(backend);
         }
         backend.Backend.ShutDownReserve = false;
         return new JObject() { ["result"] = "Success." };
@@ -179,13 +179,13 @@ public class BackendAPI
         {
             new_id = -1;
         }
-        if (new_id >= 0 && Program.Backends.T2IBackends.ContainsKey(new_id))
+        if (new_id >= 0 && BackendHandler.Instance.T2IBackends.ContainsKey(new_id))
         {
             return new() { ["error"] = $"Backend ID {new_id} is already in use." };
         }
         FDSSection parsed = FDSSection.FromSimple(settings.ToBasicObject());
         Logs.Verbose($"New settings to apply: {parsed}");
-        BackendHandler.T2IBackendData result = await Program.Backends.EditById(backend_id, parsed, title, new_id);
+        BackendHandler.T2IBackendData result = await BackendHandler.Instance.EditById(backend_id, parsed, title, new_id);
         if (result is null)
         {
             return new() { ["error"] = $"Invalid backend ID {backend_id}" };
@@ -218,7 +218,7 @@ public class BackendAPI
         [API.APIParameter("If true, include nonessential data about backends (eg what model is currently loaded).")] bool full_data = false)
     {
         JObject toRet = [];
-        foreach (BackendHandler.T2IBackendData data in Program.Backends.T2IBackends.Values.OrderBy(d => d.ID))
+        foreach (BackendHandler.T2IBackendData data in BackendHandler.Instance.T2IBackends.Values.OrderBy(d => d.ID))
         {
             if (!data.Backend.IsReal && !nonreal)
             {
@@ -253,11 +253,11 @@ public class BackendAPI
         {
             return new() { ["error"] = "Settings are locked." };
         }
-        if (!Program.Backends.BackendTypes.TryGetValue(type_id, out BackendHandler.BackendType type))
+        if (!BackendHandler.Instance.BackendTypes.TryGetValue(type_id, out BackendHandler.BackendType type))
         {
             return new() { ["error"] = $"Invalid backend type: {type_id}" };
         }
-        BackendHandler.T2IBackendData data = Program.Backends.AddNewOfType(type);
+        BackendHandler.T2IBackendData data = BackendHandler.Instance.AddNewOfType(type);
         return BackendToNet(data);
     }
 
@@ -275,7 +275,7 @@ public class BackendAPI
             return new() { ["error"] = "Settings are locked." };
         }
         int count = 0;
-        foreach (BackendHandler.T2IBackendData data in Program.Backends.T2IBackends.Values)
+        foreach (BackendHandler.T2IBackendData data in BackendHandler.Instance.T2IBackends.Values)
         {
             if (backend != "all" && backend != $"{data.ID}")
             {
@@ -283,8 +283,8 @@ public class BackendAPI
             }
             if (data.Backend.Status == BackendStatus.RUNNING || data.Backend.Status == BackendStatus.ERRORED)
             {
-                await Program.Backends.ShutdownBackendCleanly(data);
-                Program.Backends.DoInitBackend(data);
+                await BackendHandler.Instance.ShutdownBackendCleanly(data);
+                BackendHandler.Instance.DoInitBackend(data);
                 count++;
             }
         }
@@ -305,7 +305,7 @@ public class BackendAPI
             Session.RecentlyBlockedFilenames.Clear();
         }
         List<Task> tasks = [];
-        foreach (AbstractT2IBackend target in Program.Backends.RunningBackendsOfType<AbstractT2IBackend>())
+        foreach (AbstractT2IBackend target in BackendHandler.Instance.RunningBackendsOfType<AbstractT2IBackend>())
         {
             if (backend != "all" && backend != $"{target.BackendData.ID}")
             {
