@@ -5,6 +5,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SwarmUI.Accounts;
 using SwarmUI.Core;
+using SwarmUI.Backends;
 using SwarmUI.Media;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
@@ -383,7 +384,7 @@ public static class T2IAPI
                     }
                     saveImage(image, actualIndex, thisParams, metadata);
                 })));
-            if (Program.Backends.QueuedRequests < Program.ServerSettings.Backends.MaxRequestsForcedOrder)
+            if (BackendHandler.Instance.QueuedRequests < Program.ServerSettings.Backends.MaxRequestsForcedOrder)
             {
                 Task.Delay(20).Wait(); // Tiny few-ms delay to encourage tasks retaining order.
             }

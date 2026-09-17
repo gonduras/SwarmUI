@@ -1,4 +1,5 @@
 @page
+@using SwarmUI.Backends;
 @{
     ViewData["Title"] = "SwarmUI Installer";
 }
@@ -260,7 +261,7 @@
             You have: @WebUtil.CheckGPUIsSufficient()
         </div>
         @WebUtil.ModalFooter()
-        @if (Program.Backends.Count > 0)
+        @if (BackendHandler.Instance.Count > 0)
         {
             <h4>You already have backends installed, you should probably select 'None' below.</h4>
             <br>

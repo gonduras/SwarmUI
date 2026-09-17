@@ -465,7 +465,7 @@ public class ComfyUIRedirectHelper
                                 ComfyClientData[] available = user.Clients.Values.Where(c => c.Backend.MaxUsages > 0).ToArray().Shift(user.BackendOffset);
                                 if (available.Length == 0)
                                 {
-                                    if (await Program.Backends.TryToScaleANewBackend(true))
+                                    if (await BackendHandler.Instance.TryToScaleANewBackend(true))
                                     {
                                         Logs.Info("Comfy backend direct prompt request failed due to no available backends for user, causing new backends to load...");
                                         // TODO: Wait for the backend then re-prompt.
@@ -483,7 +483,7 @@ public class ComfyUIRedirectHelper
                                 ComfyClientData client = available.MinBy(c => c.QueueRemaining);
                                 if (available.All(c => c.QueueRemaining > 0))
                                 {
-                                    _ = Utilities.RunCheckedTask(async () => await Program.Backends.TryToScaleANewBackend(true));
+                                    _ = Utilities.RunCheckedTask(async () => await BackendHandler.Instance.TryToScaleANewBackend(true));
                                 }
                                 if (preferredBackendIndex >= 0)
                                 {

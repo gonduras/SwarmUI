@@ -5,6 +5,7 @@ using FreneticUtilities.FreneticDataSyntax;
 using FreneticUtilities.FreneticToolkit;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Core;
+using SwarmUI.Backends;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 
@@ -105,7 +106,7 @@ public class AutoScalingBackend : AbstractT2IBackend
         await FillToMin(100, true);
         Program.TickEvent += Tick;
         Program.PreShutdownEvent += PreShutdown;
-        Program.Backends.NewBackendNeededEvent.TryAdd(BackendData.ID, SignalWantsOne);
+        BackendHandler.Instance.NewBackendNeededEvent.TryAdd(BackendData.ID, SignalWantsOne);
         Status = BackendStatus.RUNNING;
     }
 
@@ -387,7 +388,7 @@ public class AutoScalingBackend : AbstractT2IBackend
         {
             Program.TickEvent -= Tick;
             Program.PreShutdownEvent -= PreShutdown;
-            Program.Backends.NewBackendNeededEvent.Remove(BackendData.ID, out _);
+            BackendHandler.Instance.NewBackendNeededEvent.Remove(BackendData.ID, out _);
             foreach (int id in ControlledNonrealBackends.Keys.ToArray())
             {
                 stopTasks.Add(StopOne(id));
