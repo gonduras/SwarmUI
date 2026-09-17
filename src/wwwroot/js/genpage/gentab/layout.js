@@ -224,9 +224,13 @@ class GenTabLayout {
         let barTopLeft = leftShut ? `0px` : this.leftSectionBarPos == -1 ? (this.isSmallWindow ? `14rem` : `28rem`) : `${this.leftSectionBarPos}px`;
         let barTopRight = this.rightSectionBarPos == -1 ? (this.isSmallWindow ? `4rem` : `21rem`) : `${this.rightSectionBarPos}px`;
         let curImgWidth = `100vw - ${barTopLeft} - ${barTopRight} - 10px`;
-        // TODO: this 'eval()' hack to read the size in advance is a bit cursed.
         let fontRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        let curImgWidthNum = eval(curImgWidth.replace(/vw/g, `* ${window.innerWidth * 0.01}`).replace(/rem/g, `* ${fontRem}`).replace(/px/g, ''));
+        let parseToPx = (val) => {
+            let str = `${val}`;
+            if (str.endsWith('rem')) return parseFloat(str) * fontRem;
+            return parseFloat(str) || 0;
+        };
+        let curImgWidthNum = window.innerWidth - parseToPx(barTopLeft) - parseToPx(barTopRight) - 10;
         if (curImgWidthNum < 400 && !this.isSmallWindow) {
             barTopRight = `${barTopRight} + ${400 - curImgWidthNum}px`;
             curImgWidth = `100vw - ${barTopLeft} - ${barTopRight} - 10px`;
