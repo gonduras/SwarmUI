@@ -29,6 +29,8 @@ public class ImageBatchToolExtension : Extension
         API.RegisterAPICall(ImageBatchRun, true, PermUseImageBatchTool);
     }
 
+    public record class BatchToolConfig(JObject rawInput, string input_folder, string output_folder, bool init_image, bool revision, bool controlnet, string[] imageFiles, string resMode, bool appendFilenameToPrompt);
+
     /// <summary>API route to generate images with WebSocket updates.</summary>
     public static async Task<JObject> ImageBatchRun(WebSocket socket, Session session, JObject rawInput, string input_folder, string output_folder, bool init_image, bool revision, bool controlnet, string resMode, bool append_filename_to_prompt)
     {
@@ -62,16 +64,15 @@ public class ImageBatchToolExtension : Extension
             return null;
         }
         Directory.CreateDirectory(output_folder);
-        await API.RunWebsocketHandlerCallWS(GenBatchRun_Internal, session, (rawInput, input_folder, output_folder, init_image, revision, controlnet, imageFiles, resMode, append_filename_to_prompt), socket);
+        await API.RunWebsocketHandlerCallWS(GenBatchRun_Internal, session, new BatchToolConfig(rawInput, input_folder, output_folder, init_image, revision, controlnet, imageFiles, resMode, append_filename_to_prompt), socket);
         Logs.Info("Image Batcher completed successfully");
         await socket.SendJson(new JObject() { ["success"] = "complete" }, API.WebsocketTimeout);
         return null;
     }
 
-    public static async Task GenBatchRun_Internal(Session session, (JObject, string, string, bool, bool, bool, string[], string, bool) input, Action<JObject> output, bool isWS)
+    public static async Task GenBatchRun_Internal(Session session, BatchToolConfig input, Action<JObject> output, bool isWS)
     {
-        // TODO: This is a silly way of passing data, time for a struct?
-        (JObject rawInput, string input_folder, string output_folder, bool init_image, bool revision, bool controlnet, string[] imageFiles, string resMode, bool appendFilenameToPrompt) = input;
+        var (rawInput, input_folder, output_folder, init_image, revision, controlnet, imageFiles, resMode, appendFilenameToPrompt) = input;
         using Session.GenClaim claim = session.Claim(gens: imageFiles.Length);
         async Task sendStatus()
         {
