@@ -691,23 +691,29 @@ public static class T2IAPI
             Logs.Warning($"User {session.User.UserID} tried to open image path '{origPath}' which maps to '{path}', but cannot as the image does not exist.");
             return new JObject() { ["error"] = "That file does not exist, cannot open." };
         }
+        ProcessStartInfo psi = new();
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Process.Start("explorer.exe", $"/select,\"{Path.GetFullPath(path)}\"");
+            psi.FileName = "explorer.exe";
+            psi.ArgumentList.Add($"/select,{Path.GetFullPath(path)}");
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            Process.Start("xdg-open", $"\"{Path.GetDirectoryName(Path.GetFullPath(path))}\"");
+            psi.FileName = "xdg-open";
+            psi.ArgumentList.Add(Path.GetDirectoryName(Path.GetFullPath(path)));
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            Process.Start("open", $"-R \"{Path.GetFullPath(path)}\"");
+            psi.FileName = "open";
+            psi.ArgumentList.Add("-R");
+            psi.ArgumentList.Add(Path.GetFullPath(path));
         }
         else
         {
             Logs.Warning("Cannot open image path on unrecognized OS type.");
             return new JObject() { ["error"] = "Cannot open image folder on this OS." };
         }
+        Process.Start(psi);
         return new JObject() { ["success"] = true };
     }
 
