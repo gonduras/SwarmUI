@@ -943,7 +943,7 @@ function getGenInput(input_overrides = {}, input_preoverrides = {}) {
             }
         }
     }
-    input["presets"] = currentPresets.map(p => p.title);
+    input["presets"] = presetHelpers.currentPresets.map(p => p.title);
     for (let key in input_overrides) {
         let val = input_overrides[key];
         if (val == null) {
