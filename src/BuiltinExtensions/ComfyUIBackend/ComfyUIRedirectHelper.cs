@@ -135,7 +135,7 @@ public class ComfyUIRedirectHelper
         try
         {
             using CancellationTokenSource cancel = Utilities.TimedCancel(TimeSpan.FromMinutes(1));
-            result = backend.Client.GetAsync($"{backend.APIAddress}/object_info", cancel.Token).Result.Content.ReadAsStringAsync().Result.ParseToJson();
+            result = backend.Client.GetAsync($"{backend.APIAddress}/object_info", cancel.Token).GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult().ParseToJson();
         }
         catch (Exception ex)
         {
