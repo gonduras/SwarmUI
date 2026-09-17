@@ -99,6 +99,14 @@ public static class BasicAPIFeatures
             Logs.Warning($"Login attempt from {ip} as {username}, failed due to incorrect password.");
             return new JObject() { ["error_id"] = "invalid_login" };
         }
+
+        // Upgrade password hash to v2 if it was v1 (or legacy unprefixed)
+        if (!user.Data.PasswordHashed.StartsWith("swarmpw_v2:"))
+        {
+            user.Data.PasswordHashed = Utilities.HashPassword(username, password);
+            user.Save();
+            Logs.Info($"Upgraded password hash to v2 for user {username}.");
+        }
         (_, string tok) = user.CreateLoginSession(ip, userAgent);
         if (tok is null)
         {
