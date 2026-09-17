@@ -89,9 +89,9 @@ public class AutoScalingBackend : AbstractT2IBackend
             return;
         }
         string scriptExt = Path.GetExtension(Settings.StartScript).ToLowerInvariant();
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? (scriptExt == "bat" || scriptExt == "ps1") : (scriptExt == "sh"))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? (scriptExt != ".bat" && scriptExt != ".ps1") : (scriptExt != ".sh"))
         {
-            Logs.Error($"AutoScalingBackend cannot handle start script: '{Settings.StartScript}', not an OS-appropriate shell script. Use 'sh' for Linux/Mac, or 'bat'/'ps1' for Windows.");
+            Logs.Error($"AutoScalingBackend cannot handle start script: '{Settings.StartScript}', not an OS-appropriate shell script. Use '.sh' for Linux/Mac, or '.bat'/'.ps1' for Windows.");
             Status = BackendStatus.ERRORED;
             return;
         }
@@ -235,14 +235,29 @@ public class AutoScalingBackend : AbstractT2IBackend
         try
         {
             Logs.Info($"AutoScalingBackend launching new backend instance #{id}");
+            string scriptExt2 = Path.GetExtension(Settings.StartScript).ToLowerInvariant();
             ProcessStartInfo psi = new()
             {
-                FileName = Settings.StartScript,
+                FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? (scriptExt2 == ".ps1" ? "powershell.exe" : "cmd.exe") : "/bin/sh",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 WorkingDirectory = Path.GetDirectoryName(Settings.StartScript)
             };
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (scriptExt2 == ".ps1")
+                {
+                    psi.ArgumentList.Add("-ExecutionPolicy");
+                    psi.ArgumentList.Add("Bypass");
+                    psi.ArgumentList.Add("-File");
+                }
+                else
+                {
+                    psi.ArgumentList.Add("/c");
+                }
+            }
+            psi.ArgumentList.Add(Settings.StartScript);
             Process process = Process.Start(psi) ?? throw new Exception("Failed to start backend launch process, fundamental failure. Is the start script valid?");
             StreamReader fixedReader = new(process.StandardOutput.BaseStream, Encoding.UTF8); // Force UTF-8, always
             string line;
