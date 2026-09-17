@@ -36,7 +36,7 @@ public class API
     /// <summary>Web access call route, triggered from <see cref="WebServer"/>.</summary>
     public static async Task HandleAsyncRequest(HttpContext context)
     {
-        // TODO: Validate that 'async' is truly async here. If needed, spin up our own threads.
+        await Task.Yield();
         Session session = null;
         void Error(string message)
         {
