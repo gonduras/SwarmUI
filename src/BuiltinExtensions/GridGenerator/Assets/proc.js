@@ -711,12 +711,14 @@ function updateTitleSticky() {
         header.style.top = '0';
         return;
     }
-    // client rect is dynamically animated, so, uh, just hack it for now.
-    // TODO: Actually smooth attachment.
-    var rate = 50;
-    for (var time = 0; time <= 500; time += rate) {
-        setTimeout(updateTitleStickyDirect, time);
+    let start = performance.now();
+    function anim() {
+        updateTitleStickyDirect();
+        if (performance.now() - start <= 500) {
+            requestAnimationFrame(anim);
+        }
     }
+    requestAnimationFrame(anim);
 }
 
 function toggleTopSticky() {
