@@ -40,7 +40,7 @@ class BrowserCallHelper {
         this.loadCaller = loadCaller;
     }
     call() {
-        this.loadCaller(this.path);
+        setTimeout(() => this.loadCaller(this.path), 0);
     }
 }
 
