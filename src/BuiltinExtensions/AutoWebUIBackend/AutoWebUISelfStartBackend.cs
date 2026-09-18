@@ -11,6 +11,22 @@ namespace SwarmUI.Builtin_AutoWebUIExtension;
 
 public class AutoWebUISelfStartBackend : AutoWebUIAPIAbstractBackend
 {
+    public class GPUIdImpl : SettingsOptionsAttribute.AbstractImpl
+    {
+        public override string[] GetOptions
+        {
+            get
+            {
+                NvidiaUtil.NvidiaInfo[] info = NvidiaUtil.QueryNvidia();
+                if (info is null || info.Length == 0)
+                {
+                    return null;
+                }
+                return Enumerable.Range(0, info.Length).Select(i => i.ToString()).ToArray();
+            }
+        }
+    }
+
     public class AutoWebUISelfStartSettings : AutoConfiguration
     {
         [ConfigComment("The location of the 'webui.sh' or 'webui.bat' file.")]
@@ -20,7 +36,8 @@ public class AutoWebUISelfStartBackend : AutoWebUIAPIAbstractBackend
         public string ExtraArgs = "";
 
         [ConfigComment("Which GPU to use, if multiple are available.")]
-        public int GPU_ID = 0; // TODO: Determine GPU count and provide correct max
+        [SettingsOptions(Impl = typeof(GPUIdImpl))]
+        public int GPU_ID = 0;
     }
 
     public Process RunningProcess;
