@@ -385,7 +385,7 @@ public static class T2IAPI
                 })));
             if (Program.Backends.QueuedRequests < Program.ServerSettings.Backends.MaxRequestsForcedOrder)
             {
-                Task.Delay(20).Wait(); // Tiny few-ms delay to encourage tasks retaining order.
+                await Task.Delay(20); // Tiny few-ms delay to encourage tasks retaining order.
             }
         }
         while (tasks.Any())
