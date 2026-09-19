@@ -34,7 +34,10 @@ public class AutoScalingBackend : AbstractT2IBackend
         public double MinIdleTime = 10;
 
         [ConfigComment("Minimum number of waiting generations before a new backend can be started.\nSelect this high enough to not be wasteful of resources, but low enough to not cause generation requests to be pending for too long.\nMust be set to at least 1, should ideally be set higher.")]
-        public int MinQueuedBeforeExpand = 10; // TODO: Impl me
+        public int MinQueuedBeforeExpand = 10;
+
+        [ConfigComment("Multiplier to scale how much queue depth triggers expansion.\nFor example, if you have a massive server that eats 4 requests per second, you might set a factor of 0.25 to make it wait for 4 queued generations before counting as 1 towards 'MinQueuedBeforeExpand'.")]
+        public double QueuedFactor = 1;
 
         [ConfigComment($"File path to a shell script (normally a '.sh') that will cause a new backend to be started.\nSee <a target=\"_blank\" href=\"{Utilities.RepoDocsRoot}Features/AutoScalingBackend.md\">docs Features/AutoScalingBackend</a> for info on how to build this script.")]
         public string StartScript = "";
@@ -49,7 +52,7 @@ public class AutoScalingBackend : AbstractT2IBackend
         [ConfigComment("When attempting to connect to the backend, this is the maximum time Swarm will wait before considering the connection to be failed.\nNote that depending on other configurations, it may fail faster than this.\nFor local network machines, set this to a low value (eg 5) to avoid 'Loading...' delays.")]
         public int ConnectionAttemptTimeoutSeconds = 30;
 
-        // TODO: Some form of loadfactor stuff, to allow cases of users with very large servers wanting to pre-scale
+
     }
 
     /// <summary>Auto-incremented counter of backend launches.</summary>
@@ -162,6 +165,10 @@ public class AutoScalingBackend : AbstractT2IBackend
             else
             {
                 _ = Utilities.RunCheckedTask(() => FillToMin(1, false), $"AutoScalingBackend Fill To Min");
+            }
+            if (Program.Backends.QueuedRequests * Settings.QueuedFactor >= Settings.MinQueuedBeforeExpand * (CountActiveBackends + 1))
+            {
+                _ = Utilities.RunCheckedTask(async () => await SignalWantsOne(), "AutoScalingBackend pre-scale queue length");
             }
         }
     }
