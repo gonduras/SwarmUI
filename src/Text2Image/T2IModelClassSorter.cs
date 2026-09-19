@@ -120,22 +120,54 @@ public class T2IModelClassSorter
         bool isHyImgRefiner(JObject h) => h.ContainsKey("double_blocks.0.img_attn_k_norm.weight") && h.TryGetValue("time_r_in.mlp.0.bias", out JToken timeTok) && timeTok["shape"].ToArray()[0].Value<long>() == 3328;
         bool isAuraFlow(JObject h) => h.ContainsKey("model.cond_seq_linear.weight") && h.ContainsKey("model.double_layers.0.attn.w1k.weight");
         // ====================== Stable Diffusion v1 ======================
-        Register(new() { ID = "stable-diffusion-v1", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-v1",
+            CompatClass = "stable-diffusion-v1",
+            Name = "Stable Diffusion v1",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV1(h) && !IsAlt(h) && !isV2(h) && !isXL09Base(h) && !isSD3Med(h) && !isSD3Large(h) && !isV1CNet(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v1-inpainting", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1 (Inpainting)", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v1-inpainting",
+            CompatClass = "stable-diffusion-v1",
+            Name = "Stable Diffusion v1 (Inpainting)",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO: How to detect accurately?
-        }});
-        Register(new() { ID = "stable-diffusion-v1/lora", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1 LoRA", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v1/lora",
+            CompatClass = "stable-diffusion-v1",
+            Name = "Stable Diffusion v1 LoRA",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV1Lora(h) && !isXLLora(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v1/controlnet", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1 ControlNet", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v1/controlnet",
+            CompatClass = "stable-diffusion-v1",
+            Name = "Stable Diffusion v1 ControlNet",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV1CNet(h) && !isControlLora(h) && !isDitControlnet(h);
-        }});
+        }
+        });
         JToken GetEmbeddingKey(JObject h)
         {
             if (h.TryGetValue("emb_params", out JToken emb_data))
@@ -149,7 +181,14 @@ public class T2IModelClassSorter
             }
             return null;
         }
-        Register(new() { ID = "stable-diffusion-v1/textual-inversion", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1 Embedding", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-v1/textual-inversion",
+            CompatClass = "stable-diffusion-v1",
+            Name = "Stable Diffusion v1 Embedding",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             JToken emb_data = GetEmbeddingKey(h);
             if (emb_data is null || !(emb_data as JObject).TryGetValue("shape", out JToken shape))
@@ -157,29 +196,77 @@ public class T2IModelClassSorter
                 return false;
             }
             return shape.ToArray()[^1].Value<long>() == 768;
-        }});
+        }
+        });
         // ====================== Stable Diffusion v2 ======================
-        Register(new() { ID = "stable-diffusion-v2-512", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2-512", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-512",
+            CompatClass = "stable-diffusion-v2",
+            Name = "Stable Diffusion v2-512",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV2(h) && !isV2Unclip(h) && isv2512name(m.Name) && !isV2Depth(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v2-768-v", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2-768v", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-768-v",
+            CompatClass = "stable-diffusion-v2",
+            Name = "Stable Diffusion v2-768v",
+            StandardWidth = 768,
+            StandardHeight = 768,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV2(h) && !isV2Unclip(h) && !isv2512name(m.Name);
-        }});
-        Register(new() { ID = "stable-diffusion-v2-inpainting", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2 (Inpainting)", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-inpainting",
+            CompatClass = "stable-diffusion-v2",
+            Name = "Stable Diffusion v2 (Inpainting)",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO: How to detect accurately?
-        }});
-        Register(new() { ID = "stable-diffusion-v2-depth", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2 (Depth)", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-depth",
+            CompatClass = "stable-diffusion-v2",
+            Name = "Stable Diffusion v2 (Depth)",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV2Depth(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v2-unclip", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2 (Unclip)", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-unclip",
+            CompatClass = "stable-diffusion-v2",
+            Name = "Stable Diffusion v2 (Unclip)",
+            StandardWidth = 768,
+            StandardHeight = 768,
+            IsThisModelOfClass = (m, h) =>
         {
             return isV2Unclip(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v2-768-v/textual-inversion", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2 Embedding", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-768-v/textual-inversion",
+            CompatClass = "stable-diffusion-v2",
+            Name = "Stable Diffusion v2 Embedding",
+            StandardWidth = 768,
+            StandardHeight = 768,
+            IsThisModelOfClass = (m, h) =>
         {
             JToken emb_data = GetEmbeddingKey(h);
             if (emb_data is null)
@@ -193,362 +280,1042 @@ public class T2IModelClassSorter
             return shape.ToArray()[^1].Value<long>() == 1024;
         }
         });
-        Register(new() { ID = "stable-diffusion-v2-turbo", CompatClass = "stable-diffusion-v2-turbo", Name = "Stable Diffusion v2 Turbo", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-v2-turbo",
+            CompatClass = "stable-diffusion-v2-turbo",
+            Name = "Stable Diffusion v2 Turbo",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isTurbo21(h);
-        }});
+        }
+        });
         // ====================== Stable Diffusion XL ======================
-        Register(new() { ID = "stable-diffusion-xl-v1-base", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0-Base", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v1-base",
+            CompatClass = "stable-diffusion-xl-v1",
+            Name = "Stable Diffusion XL 1.0-Base",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return Program.ServerSettings.Metadata.XLDefaultAsXL1 && isXL09Base(h);
-        }});
-        Register(new() { ID = "stable-diffusion-xl-v0_9-base", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 0.9-Base", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v0_9-base",
+            CompatClass = "stable-diffusion-xl-v1",
+            Name = "Stable Diffusion XL 0.9-Base",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return !Program.ServerSettings.Metadata.XLDefaultAsXL1 && isXL09Base(h);
-        }});
-        Register(new() { ID = "stable-diffusion-xl-v0_9-refiner", CompatClass = "stable-diffusion-xl-v1-refiner", Name = "Stable Diffusion XL 0.9-Refiner", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v0_9-refiner",
+            CompatClass = "stable-diffusion-xl-v1-refiner",
+            Name = "Stable Diffusion XL 0.9-Refiner",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isXL09Refiner(h) && !isTurbo21(h);
-        }});
-        Register(new() { ID = "stable-diffusion-xl-v1-base/lora", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0-Base LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v1-base/lora",
+            CompatClass = "stable-diffusion-xl-v1",
+            Name = "Stable Diffusion XL 1.0-Base LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isXLLora(h);
-        }});
-        Register(new() { ID = "stable-diffusion-xl-v1-base/controlnet", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0-Base ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v1-base/controlnet",
+            CompatClass = "stable-diffusion-xl-v1",
+            Name = "Stable Diffusion XL 1.0-Base ControlNet",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isXLControlnet(h) && !isDitControlnet(h);
-        }});
-        Register(new() { ID = "stable-diffusion-xl-v1-base/textual-inversion", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0-Base Embedding", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v1-base/textual-inversion",
+            CompatClass = "stable-diffusion-xl-v1",
+            Name = "Stable Diffusion XL 1.0-Base Embedding",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return h.TryGetValue("clip_g", out JToken clip_g) && (clip_g as JObject).TryGetValue("shape", out JToken shape_g) && shape_g[1].Value<long>() == 1280
                 && h.TryGetValue("clip_l", out JToken clip_l) && (clip_l as JObject).TryGetValue("shape", out JToken shape_l) && shape_l[1].Value<long>() == 768;
-        }});
+        }
+        });
         // ====================== Stable Video Diffusion ======================
-        Register(new() { ID = "stable-video-diffusion-img2vid-v0_9", CompatClass = "stable-video-diffusion-img2vid-v1", Name = "Stable Video Diffusion Img2Vid 0.9", StandardWidth = 1024, StandardHeight = 576, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-video-diffusion-img2vid-v0_9",
+            CompatClass = "stable-video-diffusion-img2vid-v1",
+            Name = "Stable Video Diffusion Img2Vid 0.9",
+            StandardWidth = 1024,
+            StandardHeight = 576,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSVD(h);
-        }});
+        }
+        });
         // ====================== Mochi (Genmo video) ======================
-        Register(new() { ID = "genmo-mochi-1", CompatClass = "genmo-mochi-1", Name = "Genmo Mochi 1", StandardWidth = 848, StandardHeight = 480, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "genmo-mochi-1",
+            CompatClass = "genmo-mochi-1",
+            Name = "Genmo Mochi 1",
+            StandardWidth = 848,
+            StandardHeight = 480,
+            IsThisModelOfClass = (m, h) =>
         {
             return isMochi(h);
-        }});
-        Register(new() { ID = "genmo-mochi-1/vae", CompatClass = "genmo-mochi-1", Name = "Genmo Mochi 1 VAE", StandardWidth = 848, StandardHeight = 480, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "genmo-mochi-1/vae",
+            CompatClass = "genmo-mochi-1",
+            Name = "Genmo Mochi 1 VAE",
+            StandardWidth = 848,
+            StandardHeight = 480,
+            IsThisModelOfClass = (m, h) =>
         {
             return isMochiVae(h);
-        }});
+        }
+        });
         // ====================== Stable Cascade ======================
-        Register(new() { ID = "stable-cascade-v1-stage-a/vae", CompatClass = "stable-cascade-v1", Name = "Stable Cascade v1 (Stage A)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
         {
-             return isCascadeA(h) && !isCascadeB(h) && !isCascadeC(h);
-        }});
-        Register(new() { ID = "stable-cascade-v1-stage-b", CompatClass = "stable-cascade-v1", Name = "Stable Cascade v1 (Stage B)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+            ID = "stable-cascade-v1-stage-a/vae",
+            CompatClass = "stable-cascade-v1",
+            Name = "Stable Cascade v1 (Stage A)",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
+        {
+            return isCascadeA(h) && !isCascadeB(h) && !isCascadeC(h);
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-cascade-v1-stage-b",
+            CompatClass = "stable-cascade-v1",
+            Name = "Stable Cascade v1 (Stage B)",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCascadeB(h);
-        }});
-        Register(new() { ID = "stable-cascade-v1-stage-c", CompatClass = "stable-cascade-v1", Name = "Stable Cascade v1 (Stage C)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-cascade-v1-stage-c",
+            CompatClass = "stable-cascade-v1",
+            Name = "Stable Cascade v1 (Stage C)",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCascadeC(h);
-        }});
+        }
+        });
         // ====================== Stable Diffusion v3 ======================
-        Register(new() { ID = "stable-diffusion-v3-medium", CompatClass = "stable-diffusion-v3-medium", Name = "Stable Diffusion 3 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-v3-medium",
+            CompatClass = "stable-diffusion-v3-medium",
+            Name = "Stable Diffusion 3 Medium",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSD3Med(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v3.5-large", CompatClass = "stable-diffusion-v3.5-large", Name = "Stable Diffusion 3.5 Large", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3.5-large",
+            CompatClass = "stable-diffusion-v3.5-large",
+            Name = "Stable Diffusion 3.5 Large",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSD3Large(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v3.5-medium", CompatClass = "stable-diffusion-v3.5-medium", Name = "Stable Diffusion 3.5 Medium", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3.5-medium",
+            CompatClass = "stable-diffusion-v3.5-medium",
+            Name = "Stable Diffusion 3.5 Medium",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "stable-diffusion-v3-medium/lora", CompatClass = "stable-diffusion-v3-medium", Name = "Stable Diffusion 3 Medium LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3-medium/lora",
+            CompatClass = "stable-diffusion-v3-medium",
+            Name = "Stable Diffusion 3 Medium LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO: ?
-        }});
-        Register(new() { ID = "stable-diffusion-v3.5-large/lora", CompatClass = "stable-diffusion-v3.5-large", Name = "Stable Diffusion 3.5 Large LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3.5-large/lora",
+            CompatClass = "stable-diffusion-v3.5-large",
+            Name = "Stable Diffusion 3.5 Large LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSD35Lora(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v3.5-medium/lora", CompatClass = "stable-diffusion-v3.5-medium", Name = "Stable Diffusion 3.5 Medium LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3.5-medium/lora",
+            CompatClass = "stable-diffusion-v3.5-medium",
+            Name = "Stable Diffusion 3.5 Medium LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "stable-diffusion-v3-medium/controlnet", CompatClass = "stable-diffusion-v3-medium", Name = "Stable Diffusion 3 Medium ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3-medium/controlnet",
+            CompatClass = "stable-diffusion-v3-medium",
+            Name = "Stable Diffusion 3 Medium ControlNet",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSD3Controlnet(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v3.5-large/controlnet", CompatClass = "stable-diffusion-v3.5-large", Name = "Stable Diffusion 3.5 Large ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3.5-large/controlnet",
+            CompatClass = "stable-diffusion-v3.5-large",
+            Name = "Stable Diffusion 3.5 Large ControlNet",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSd35LargeControlnet(h);
-        }});
-        Register(new() { ID = "stable-diffusion-v3.5-medium/controlnet", CompatClass = "stable-diffusion-v3.5-medium", Name = "Stable Diffusion 3.5 Medium ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3.5-medium/controlnet",
+            CompatClass = "stable-diffusion-v3.5-medium",
+            Name = "Stable Diffusion 3.5 Medium ControlNet",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "stable-diffusion-v3/vae", CompatClass = "stable-diffusion-v3", Name = "Stable Diffusion 3 VAE", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "stable-diffusion-v3/vae",
+            CompatClass = "stable-diffusion-v3",
+            Name = "Stable Diffusion 3 VAE",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
+        }
+        });
         // ====================== BFL Flux.1 ======================
         Register(new() { ID = "flux.1/vae", CompatClass = "flux-1", Name = "Flux.1 Autoencoder", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
-        Register(new() { ID = "Flux.1-schnell", CompatClass = "flux-1", Name = "Flux.1 Schnell", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "Flux.1-schnell",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Schnell",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isFluxSchnell(h) && !isChroma(h);
-        }});
-        Register(new() { ID = "Flux.1-dev", CompatClass = "flux-1", Name = "Flux.1 Dev", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Dev",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isFluxDev(h);
-        }});
-        Register(new() { ID = "Flux.1-dev/lora", CompatClass = "flux-1", Name = "Flux.1 LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/lora",
+            CompatClass = "flux-1",
+            Name = "Flux.1 LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isFluxLora(h);
-        }});
-        Register(new() { ID = "Flux.1-dev/depth", CompatClass = "flux-1", Name = "Flux.1 Depth", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/depth",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Depth",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "Flux.1-dev/canny", CompatClass = "flux-1", Name = "Flux.1 Canny", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/canny",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Canny",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "Flux.1-dev/inpaint", CompatClass = "flux-1", Name = "Flux.1 Fill/Inpaint", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/inpaint",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Fill/Inpaint",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "Flux.1-dev/kontext", CompatClass = "flux-1", Name = "Flux.1 Kontext Dev", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/kontext",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Kontext Dev",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // ???
-        }});
-        Register(new() { ID = "Flux.1-dev/lora-depth", CompatClass = "flux-1", Name = "Flux.1 Depth LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/lora-depth",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Depth LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "Flux.1-dev/lora-canny", CompatClass = "flux-1", Name = "Flux.1 Canny LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/lora-canny",
+            CompatClass = "flux-1",
+            Name = "Flux.1 Canny LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "Flux.1-dev/controlnet", CompatClass = "flux-1", Name = "Flux.1 ControlNet", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "Flux.1-dev/controlnet",
+            CompatClass = "flux-1",
+            Name = "Flux.1 ControlNet",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isFluxControlnet(h);
-        }});
-        Register(new() { ID = "flux.1-dev/controlnet-alimamainpaint", CompatClass = "flux-1", Name = "Flux.1 ControlNet - AliMama Inpaint", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "flux.1-dev/controlnet-alimamainpaint",
+            CompatClass = "flux-1",
+            Name = "Flux.1 ControlNet - AliMama Inpaint",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
+        }
+        });
         // ====================== Wan Video ======================
-        Register(new() { ID = "wan-2_1-text2video/vae", CompatClass = "wan-21", Name = "Wan 2.1 VAE", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) => { return false; }});
-        Register(new() { ID = "wan-2_1-text2video-1_3b", CompatClass = "wan-21-1_3b", Name = "Wan 2.1 Text2Video 1.3B", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        Register(new() { ID = "wan-2_1-text2video/vae", CompatClass = "wan-21", Name = "Wan 2.1 VAE", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) => { return false; } });
+        Register(new()
+        {
+            ID = "wan-2_1-text2video-1_3b",
+            CompatClass = "wan-21-1_3b",
+            Name = "Wan 2.1 Text2Video 1.3B",
+            StandardWidth = 640,
+            StandardHeight = 640,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_1_3b(h) && !isWanI2v(h) && !isWanVace(h);
-        }});
-        Register(new() { ID = "wan-2_1-image2video-1_3b", CompatClass = "wan-21-1_3b", Name = "Wan 2.1 Image2Video 1.3B", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-image2video-1_3b",
+            CompatClass = "wan-21-1_3b",
+            Name = "Wan 2.1 Image2Video 1.3B",
+            StandardWidth = 640,
+            StandardHeight = 640,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_1_3b(h) && isWanI2v(h) && !isWanVace(h);
-        }});
-        Register(new() { ID = "wan-2_1-text2video-1_3b/lora", CompatClass = "wan-21-1_3b", Name = "Wan 2.1 Text2Video 1.3B LoRA", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-text2video-1_3b/lora",
+            CompatClass = "wan-21-1_3b",
+            Name = "Wan 2.1 Text2Video 1.3B LoRA",
+            StandardWidth = 640,
+            StandardHeight = 640,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_1_3bLora(h);
-        }});
-        Register(new() { ID = "wan-2_1-text2video-14b", CompatClass = "wan-21-14b", Name = "Wan 2.1 Text2Video 14B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-text2video-14b",
+            CompatClass = "wan-21-14b",
+            Name = "Wan 2.1 Text2Video 14B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_14b(h) && !isWanI2v(h) && !isWanVace(h) && !hasWani2vpatch(h);
-        }});
-        Register(new() { ID = "wan-2_1-text2video-14b/lora", CompatClass = "wan-21-14b", Name = "Wan 2.1 14B LoRA", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-text2video-14b/lora",
+            CompatClass = "wan-21-14b",
+            Name = "Wan 2.1 14B LoRA",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_14bLora(h);
-        }});
-        Register(new() { ID = "wan-2_1-image2video-14b", CompatClass = "wan-21-14b", Name = "Wan 2.1 Image2Video 14B", StandardWidth = 640, StandardHeight = 640, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-image2video-14b",
+            CompatClass = "wan-21-14b",
+            Name = "Wan 2.1 Image2Video 14B",
+            StandardWidth = 640,
+            StandardHeight = 640,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_14b(h) && isWan21i2v(h) && isWanI2v(h) && !isWanflf2v(h) && !isWanVace(h);
-        }});
-        Register(new() { ID = "wan-2_1-flf2v-14b", CompatClass = "wan-21-14b", Name = "Wan 2.1 First/LastFrame2Video 14B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-flf2v-14b",
+            CompatClass = "wan-21-14b",
+            Name = "Wan 2.1 First/LastFrame2Video 14B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_14b(h) && isWanI2v(h) && isWanflf2v(h) && !isWanVace(h);
-        }});
-        Register(new() { ID = "wan-2_1-vace-14b", CompatClass = "wan-21-14b", Name = "Wan 2.1 Vace 14B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-vace-14b",
+            CompatClass = "wan-21-14b",
+            Name = "Wan 2.1 Vace 14B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_14b(h) && !isWanflf2v(h) && isWanVace(h);
-        }});
-        Register(new() { ID = "wan-2_1-vace-1_3b", CompatClass = "wan-21-1_3b", Name = "Wan 2.1 Vace 1.3B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_1-vace-1_3b",
+            CompatClass = "wan-21-1_3b",
+            Name = "Wan 2.1 Vace 1.3B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_1_3b(h) && !isWanflf2v(h) && isWanVace(h);
-        }});
-        Register(new() { ID = "wan-2_2-ti2v-5b", CompatClass = "wan-22-5b", Name = "Wan 2.2 Text/Image2Video 5B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_2-ti2v-5b",
+            CompatClass = "wan-22-5b",
+            Name = "Wan 2.2 Text/Image2Video 5B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan22_5b(h);
-        }});
-        Register(new() { ID = "wan-2_2-ti2v-5b/lora", CompatClass = "wan-22-5b", Name = "Wan 2.2 Text/Image2Video 5B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_2-ti2v-5b/lora",
+            CompatClass = "wan-22-5b",
+            Name = "Wan 2.2 Text/Image2Video 5B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO
-        }});
-        Register(new() { ID = "wan-2_2-image2video-14b", CompatClass = "wan-21-14b", Name = "Wan 2.2 Image2Video 14B", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "wan-2_2-image2video-14b",
+            CompatClass = "wan-21-14b",
+            Name = "Wan 2.2 Image2Video 14B",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isWan21_14b(h) && hasWani2vpatch(h) && !isWanI2v(h) && !isWan21i2v(h);
-        }});
+        }
+        });
         // ====================== Hunyuan Video ======================
-        Register(new() { ID = "hunyuan-video", CompatClass = "hunyuan-video", Name = "Hunyuan Video", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "hunyuan-video",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHunyuanVideo(h) && !isHunyuanVideoNativeImage2V(h) && !isHyImg(h) && !isHyImgRefiner(h) && !isHunyuanVideoSkyreelsImage2V(h);
-        }});
-        Register(new() { ID = "hunyuan-video-skyreels", CompatClass = "hunyuan-video", Name = "Hunyuan Video - SkyReels Text2Video", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-video-skyreels",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video - SkyReels Text2Video",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "hunyuan-video-skyreels-i2v", CompatClass = "hunyuan-video", Name = "Hunyuan Video - SkyReels Image2Video", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-video-skyreels-i2v",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video - SkyReels Image2Video",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHunyuanVideo(h) && isHunyuanVideoSkyreelsImage2V(h) && !isHyImg(h) && !isHyImgRefiner(h);
-        }});
-        Register(new() { ID = "hunyuan-video-i2v", CompatClass = "hunyuan-video", Name = "Hunyuan Video - Image2Video", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-video-i2v",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video - Image2Video",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHunyuanVideo(h) && isHunyuanVideoNativeImage2V(h) && !isHyImg(h) && !isHyImgRefiner(h);
-        }});
-        Register(new() { ID = "hunyuan-video-i2v-v2", CompatClass = "hunyuan-video", Name = "Hunyuan Video - Image2Video v2 ('Fixed')", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-video-i2v-v2",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video - Image2Video v2 ('Fixed')",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "hunyuan-video/vae", CompatClass = "hunyuan-video", Name = "Hunyuan Video VAE", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-video/vae",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video VAE",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHunyuanVideoVae(h);
-        }});
-        Register(new() { ID = "hunyuan-video/lora", CompatClass = "hunyuan-video", Name = "Hunyuan Video LoRA", StandardWidth = 720, StandardHeight = 720, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-video/lora",
+            CompatClass = "hunyuan-video",
+            Name = "Hunyuan Video LoRA",
+            StandardWidth = 720,
+            StandardHeight = 720,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHunyuanVideoLora(h);
-        }});
+        }
+        });
         // ====================== Nvidia Cosmos ======================
-        Register(new() { ID = "nvidia-cosmos-1-7b-text2world", CompatClass = "nvidia-cosmos-1", Name = "NVIDIA Cosmos 1.0 Diffusion (7B) Text2World", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "nvidia-cosmos-1-7b-text2world",
+            CompatClass = "nvidia-cosmos-1",
+            Name = "NVIDIA Cosmos 1.0 Diffusion (7B) Text2World",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmos7b(h) && (int)h["net.x_embedder.proj.1.weight"]["shape"].ToArray()[^1].Value<long>() == 68;
-        }});
-        Register(new() { ID = "nvidia-cosmos-1-14b-text2world", CompatClass = "nvidia-cosmos-1", Name = "NVIDIA Cosmos 1.0 Diffusion (14B) Text2World", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-cosmos-1-14b-text2world",
+            CompatClass = "nvidia-cosmos-1",
+            Name = "NVIDIA Cosmos 1.0 Diffusion (14B) Text2World",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmos14b(h) && (int)h["net.x_embedder.proj.1.weight"]["shape"].ToArray()[^1].Value<long>() == 68;
-        }});
-        Register(new() { ID = "nvidia-cosmos-1-7b-video2world", CompatClass = "nvidia-cosmos-1", Name = "NVIDIA Cosmos 1.0 Diffusion (7B) Video2World", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-cosmos-1-7b-video2world",
+            CompatClass = "nvidia-cosmos-1",
+            Name = "NVIDIA Cosmos 1.0 Diffusion (7B) Video2World",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmos7b(h) && (int)h["net.x_embedder.proj.1.weight"]["shape"].ToArray()[^1].Value<long>() == 72;
-        }});
-        Register(new() { ID = "nvidia-cosmos-1-14b-video2world", CompatClass = "nvidia-cosmos-1", Name = "NVIDIA Cosmos 1.0 Diffusion (14B) Video2World", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-cosmos-1-14b-video2world",
+            CompatClass = "nvidia-cosmos-1",
+            Name = "NVIDIA Cosmos 1.0 Diffusion (14B) Video2World",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmos14b(h) && (int)h["net.x_embedder.proj.1.weight"]["shape"].ToArray()[^1].Value<long>() == 72;
-        }});
-        Register(new() { ID = "nvidia-cosmos-1/vae", CompatClass = "nvidia-cosmos-1", Name = "NVIDIA Cosmos 1.0 Diffusion VAE", StandardWidth = 960, StandardHeight = 960, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-cosmos-1/vae",
+            CompatClass = "nvidia-cosmos-1",
+            Name = "NVIDIA Cosmos 1.0 Diffusion VAE",
+            StandardWidth = 960,
+            StandardHeight = 960,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmosVae(h);
-        }});
+        }
+        });
         // ====================== Nvidia Cosmos Predict2 ======================
-        Register(new() { ID = "nvidia-cosmos-predict2-t2i-2b", CompatClass = "nvidia-cosmos-predict2-t2i-2b", Name = "NVIDIA Cosmos Predict2 Text2Image 2B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "nvidia-cosmos-predict2-t2i-2b",
+            CompatClass = "nvidia-cosmos-predict2-t2i-2b",
+            Name = "NVIDIA Cosmos Predict2 Text2Image 2B",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmosPredict2_2B(h);
-        }});
-        Register(new() { ID = "nvidia-cosmos-predict2-t2i-14b", CompatClass = "nvidia-cosmos-predict2-t2i-14b", Name = "NVIDIA Cosmos Predict2 Text2Image 14B", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-cosmos-predict2-t2i-14b",
+            CompatClass = "nvidia-cosmos-predict2-t2i-14b",
+            Name = "NVIDIA Cosmos Predict2 Text2Image 14B",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isCosmosPredict2_14B(h);
-        }});
+        }
+        });
         // ====================== Random Other Models ======================
-        Register(new() { ID = "chroma", CompatClass = "chroma", Name = "Chroma", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "chroma",
+            CompatClass = "chroma",
+            Name = "Chroma",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isChroma(h) && !isChromaRadiance(h);
-        }});
-        Register(new() { ID = "chroma-radiance", CompatClass = "chroma-radiance", Name = "Chroma Radiance", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "chroma-radiance",
+            CompatClass = "chroma-radiance",
+            Name = "Chroma Radiance",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isChroma(h) && isChromaRadiance(h);
-        }});
-        Register(new() { ID = "alt_diffusion_v1_512_placeholder", CompatClass = "alt_diffusion_v1", Name = "Alt-Diffusion", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "alt_diffusion_v1_512_placeholder",
+            CompatClass = "alt_diffusion_v1",
+            Name = "Alt-Diffusion",
+            StandardWidth = 512,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return IsAlt(h);
-        }});
-        Register(new() { ID = "lightricks-ltx-video", CompatClass = "lightricks-ltx-video", Name = "Lightricks LTX Video", StandardWidth = 768, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "lightricks-ltx-video",
+            CompatClass = "lightricks-ltx-video",
+            Name = "Lightricks LTX Video",
+            StandardWidth = 768,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isLtxv(h);
-        }});
-        Register(new() { ID = "lightricks-ltx-video/vae", CompatClass = "lightricks-ltx-video", Name = "Lightricks LTX Video VAE", StandardWidth = 768, StandardHeight = 512, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "lightricks-ltx-video/vae",
+            CompatClass = "lightricks-ltx-video",
+            Name = "Lightricks LTX Video VAE",
+            StandardWidth = 768,
+            StandardHeight = 512,
+            IsThisModelOfClass = (m, h) =>
         {
             return isLtxvVae(h);
-        }});
-        Register(new() { ID = "nvidia-sana-1600", CompatClass = "nvidia-sana-1600", Name = "NVIDIA Sana 1600M", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-sana-1600",
+            CompatClass = "nvidia-sana-1600",
+            Name = "NVIDIA Sana 1600M",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isSana(h);
-        }});
-        Register(new() { ID = "nvidia-sana-1600/vae", CompatClass = "nvidia-sana-1600", Name = "NVIDIA Sana 1600M DC-AE VAE", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "nvidia-sana-1600/vae",
+            CompatClass = "nvidia-sana-1600",
+            Name = "NVIDIA Sana 1600M DC-AE VAE",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return h.ContainsKey("decoder.stages.0.0.main.conv.bias");
-        }});
-        Register(new() { ID = "lumina-2", CompatClass = "lumina-2", Name = "Lumina 2", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "lumina-2",
+            CompatClass = "lumina-2",
+            Name = "Lumina 2",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isLumina2(h);
-        }});
-        Register(new() { ID = "hidream-i1", CompatClass = "hidream-i1", Name = "HiDream i1", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hidream-i1",
+            CompatClass = "hidream-i1",
+            Name = "HiDream i1",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHiDream(h);
-        }});
-        Register(new() { ID = "hidream-i1-edit", CompatClass = "hidream-i1", Name = "HiDream i1 Edit", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hidream-i1-edit",
+            CompatClass = "hidream-i1",
+            Name = "HiDream i1 Edit",
+            StandardWidth = 768,
+            StandardHeight = 768,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // Must manual edit, seems undetectable?
-        }});
-        Register(new() { ID = "hidream-i1/lora", CompatClass = "hidream-i1", Name = "HiDream i1 LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hidream-i1/lora",
+            CompatClass = "hidream-i1",
+            Name = "HiDream i1 LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHiDreamLora(h);
-        }});
-        Register(new() { ID = "omnigen-2", CompatClass = "omnigen-2", Name = "OmniGen 2", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "omnigen-2",
+            CompatClass = "omnigen-2",
+            Name = "OmniGen 2",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isOmniGen(h);
-        }});
-        Register(new() { ID = "qwen-image", CompatClass = "qwen-image", Name = "Qwen Image", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "qwen-image",
+            CompatClass = "qwen-image",
+            Name = "Qwen Image",
+            StandardWidth = 1328,
+            StandardHeight = 1328,
+            IsThisModelOfClass = (m, h) =>
         {
             return isQwenImage(h) && !isControlnetX(h) && !isSD3Controlnet(h);
-        }});
-        Register(new() { ID = "qwen-image-edit", CompatClass = "qwen-image", Name = "Qwen Image Edit", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "qwen-image-edit",
+            CompatClass = "qwen-image",
+            Name = "Qwen Image Edit",
+            StandardWidth = 1328,
+            StandardHeight = 1328,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "qwen-image-edit-plus", CompatClass = "qwen-image", Name = "Qwen Image Edit Plus", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "qwen-image-edit-plus",
+            CompatClass = "qwen-image",
+            Name = "Qwen Image Edit Plus",
+            StandardWidth = 1328,
+            StandardHeight = 1328,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "qwen-image/controlnet", CompatClass = "qwen-image", Name = "Qwen Image Controlnet", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
         {
-            return isQwenImage(h) && isControlnetX(h) &&!isFluxControlnet(h);
-        }});
-        Register(new() { ID = "qwen-image/vae", CompatClass = "qwen-image", Name = "Qwen Image VAE", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+            ID = "qwen-image/controlnet",
+            CompatClass = "qwen-image",
+            Name = "Qwen Image Controlnet",
+            StandardWidth = 1328,
+            StandardHeight = 1328,
+            IsThisModelOfClass = (m, h) =>
+        {
+            return isQwenImage(h) && isControlnetX(h) && !isFluxControlnet(h);
+        }
+        });
+        Register(new()
+        {
+            ID = "qwen-image/vae",
+            CompatClass = "qwen-image",
+            Name = "Qwen Image VAE",
+            StandardWidth = 1328,
+            StandardHeight = 1328,
+            IsThisModelOfClass = (m, h) =>
         {
             return false; // TODO?
-        }});
-        Register(new() { ID = "qwen-image/lora", CompatClass = "qwen-image", Name = "Qwen Image LoRA", StandardWidth = 1328, StandardHeight = 1328, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "qwen-image/lora",
+            CompatClass = "qwen-image",
+            Name = "Qwen Image LoRA",
+            StandardWidth = 1328,
+            StandardHeight = 1328,
+            IsThisModelOfClass = (m, h) =>
         {
             return isQwenImageLora(h);
-        }});
+        }
+        });
         // ====================== Hunyuan Image 2.1 ======================
-        Register(new() { ID = "hunyuan-image-2_1", CompatClass = "hunyuan-image-2_1", Name = "Hunyuan Image", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "hunyuan-image-2_1",
+            CompatClass = "hunyuan-image-2_1",
+            Name = "Hunyuan Image",
+            StandardWidth = 2048,
+            StandardHeight = 2048,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHyImg(h) && !isHyImgRefiner(h);
-        }});
-        Register(new() { ID = "hunyuan-image-2_1/lora", CompatClass = "hunyuan-image-2_1", Name = "Hunyuan Image LoRA", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-image-2_1/lora",
+            CompatClass = "hunyuan-image-2_1",
+            Name = "Hunyuan Image LoRA",
+            StandardWidth = 2048,
+            StandardHeight = 2048,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "hunyuan-image-2_1/vae", CompatClass = "hunyuan-image-2_1", Name = "Hunyuan Image VAE", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-image-2_1/vae",
+            CompatClass = "hunyuan-image-2_1",
+            Name = "Hunyuan Image VAE",
+            StandardWidth = 2048,
+            StandardHeight = 2048,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "hunyuan-image-2_1-refiner", CompatClass = "hunyuan-image-2_1-refiner", Name = "Hunyuan Image Refiner", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-image-2_1-refiner",
+            CompatClass = "hunyuan-image-2_1-refiner",
+            Name = "Hunyuan Image Refiner",
+            StandardWidth = 2048,
+            StandardHeight = 2048,
+            IsThisModelOfClass = (m, h) =>
         {
             return isHyImgRefiner(h);
-        }});
-        Register(new() { ID = "hunyuan-image-2_1-refiner/lora", CompatClass = "hunyuan-image-2_1-refiner", Name = "Hunyuan Image Refiner LoRA", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-image-2_1-refiner/lora",
+            CompatClass = "hunyuan-image-2_1-refiner",
+            Name = "Hunyuan Image Refiner LoRA",
+            StandardWidth = 2048,
+            StandardHeight = 2048,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
-        Register(new() { ID = "hunyuan-image-2_1-refiner/vae", CompatClass = "hunyuan-image-2_1-refiner", Name = "Hunyuan Image Refiner VAE", StandardWidth = 2048, StandardHeight = 2048, IsThisModelOfClass = (m, h) =>
+        }
+        });
+        Register(new()
+        {
+            ID = "hunyuan-image-2_1-refiner/vae",
+            CompatClass = "hunyuan-image-2_1-refiner",
+            Name = "Hunyuan Image Refiner VAE",
+            StandardWidth = 2048,
+            StandardHeight = 2048,
+            IsThisModelOfClass = (m, h) =>
         {
             return false;
-        }});
+        }
+        });
         // ====================== AuraFlow v1 ======================
-        Register(new() { ID = "auraflow-v1", CompatClass = "auraflow-v1", Name = "AuraFlow", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "auraflow-v1",
+            CompatClass = "auraflow-v1",
+            Name = "AuraFlow",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isAuraFlow(h);
-        }});
+        }
+        });
         // ====================== Everything below this point does not autodetect, it must match through ModelSpec or be manually set ======================
         // General Stable Diffusion variants
         Register(new() { ID = "stable-diffusion-v1/vae", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1 VAE", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) => { return false; } });
@@ -558,12 +1325,20 @@ public class T2IModelClassSorter
         Register(new() { ID = "stable-diffusion-xl-v1-refiner", CompatClass = "stable-diffusion-xl-v1-refiner", Name = "Stable Diffusion XL 1.0-Refiner", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-xl-v1-base/vae", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0-Base VAE", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-xl-v1-edit", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0 Edit", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
-        Register(new() { ID = "stable-diffusion-xl-v1-base/control-lora", CompatClass = "stable-diffusion-xl-v1", Name = "Stable Diffusion XL 1.0-Base Control-LoRA", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) =>
+        Register(new()
+        {
+            ID = "stable-diffusion-xl-v1-base/control-lora",
+            CompatClass = "stable-diffusion-xl-v1",
+            Name = "Stable Diffusion XL 1.0-Base Control-LoRA",
+            StandardWidth = 1024,
+            StandardHeight = 1024,
+            IsThisModelOfClass = (m, h) =>
         {
             return isControlLora(h);
-        }});
+        }
+        });
         Register(new() { ID = "segmind-stable-diffusion-1b", CompatClass = "segmind-stable-diffusion-1b", Name = "Segmind Stable Diffusion 1B (SSD-1B)", StandardWidth = 1024, StandardHeight = 1024, IsThisModelOfClass = (m, h) => { return false; } });
-        Register(new() { ID = "stable-video-diffusion-img2vid-v1", CompatClass = "stable-video-diffusion-img2vid-v1", Name = "Stable Video Diffusion Img2Vid v1", StandardWidth = 1024, StandardHeight = 576, IsThisModelOfClass = (m, h) => { return false; }});
+        Register(new() { ID = "stable-video-diffusion-img2vid-v1", CompatClass = "stable-video-diffusion-img2vid-v1", Name = "Stable Video Diffusion Img2Vid v1", StandardWidth = 1024, StandardHeight = 576, IsThisModelOfClass = (m, h) => { return false; } });
         // TensorRT variants
         Register(new() { ID = "stable-diffusion-v1/tensorrt", CompatClass = "stable-diffusion-v1", Name = "Stable Diffusion v1 (TensorRT Engine)", StandardWidth = 512, StandardHeight = 512, IsThisModelOfClass = (m, h) => { return false; } });
         Register(new() { ID = "stable-diffusion-v2-768-v/tensorrt", CompatClass = "stable-diffusion-v2", Name = "Stable Diffusion v2 (TensorRT Engine)", StandardWidth = 768, StandardHeight = 768, IsThisModelOfClass = (m, h) => { return false; } });
