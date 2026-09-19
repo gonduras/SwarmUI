@@ -110,11 +110,6 @@ public static class OutputMetadataTracker
                 File.Delete(path);
                 ldb = new(path);
             }
-            // TODO: TEMP 0.9.7: Clear out old image_metadata files.
-            if (File.Exists($"{folder}/image_metadata.ldb"))
-            {
-                File.Delete($"{folder}/image_metadata.ldb");
-            }
             return new(folder, new(), ldb, ldb.GetCollection<OutputMetadataEntry>("output_metadata"), ldb.GetCollection<OutputPreviewEntry>("output_previews"));
         });
     }
@@ -456,15 +451,6 @@ public static class OutputMetadataTracker
                 if (File.Exists($"{name}/swarm_metadata-log.ldb"))
                 {
                     File.Delete($"{name}/swarm_metadata-log.ldb");
-                }
-                // TODO: TEMP: 0.9.7: "image_metadata" used to be the name of these files.
-                if (File.Exists($"{name}/image_metadata.ldb"))
-                {
-                    File.Delete($"{name}/image_metadata.ldb");
-                }
-                if (File.Exists($"{name}/image_metadata-log.ldb"))
-                {
-                    File.Delete($"{name}/image_metadata-log.ldb");
                 }
             }
             catch (IOException) { }
