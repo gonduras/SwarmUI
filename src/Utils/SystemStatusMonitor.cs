@@ -45,7 +45,7 @@ public static class SystemStatusMonitor
     /// <summary>Updates system status.</summary>
     public static void Tick()
     {
-        Task.Run(() =>
+        Utilities.RunCheckedTask(async () =>
         {
             if (HardwareInfo is null) // Failed to init
             {
@@ -55,7 +55,7 @@ public static class SystemStatusMonitor
             {
                 return;
             }
-            DeDuplicator.Wait();
+            await DeDuplicator.WaitAsync();
             try
             {
                 long newProcessorTime = SelfProc.TotalProcessorTime.Milliseconds;
@@ -80,6 +80,6 @@ public static class SystemStatusMonitor
             {
                 DeDuplicator.Release();
             }
-        });
+        }, "SystemStatusMonitor.Tick");
     }
 }
