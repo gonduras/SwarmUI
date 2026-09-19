@@ -1085,10 +1085,6 @@ public class T2IParamTypes
     public static T2IParamType GetType(string name, T2IParamInput context)
     {
         name = CleanTypeName(name);
-        if (name == "saveintermediateimages") // TODO: Temporary, renamed 0.9.5
-        {
-            name = "outputintermediateimages";
-        }
         T2IParamType result;
         foreach (Func<string, T2IParamInput, T2IParamType> provider in FakeTypeProviders)
         {
