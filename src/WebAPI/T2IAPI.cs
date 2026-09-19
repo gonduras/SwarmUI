@@ -505,40 +505,38 @@ public static class T2IAPI
         {
             ConcurrentDictionary<string, string> dirsConc = [];
             ConcurrentDictionary<string, string> finalDirs = [];
-            ConcurrentDictionary<string, Task> tasks = [];
-            void addDirs(string dir, int subDepth)
+            async Task addDirs(string dir, int subDepth)
             {
-                tasks.TryAdd(dir, Utilities.RunCheckedTask(() =>
+                if (dir.EndsWith('/'))
                 {
-                    if (dir.EndsWith('/'))
+                    dir = dir[..^1];
+                }
+                if (dir != "")
+                {
+                    (subDepth == 0 ? finalDirs : dirsConc).TryAdd(dir, dir);
+                }
+                if (subDepth > 0)
+                {
+                    string actualPath = $"{path}/{dir}";
+                    actualPath = UserImageHistoryHelper.GetRealPathFor(session.User, actualPath, root: root);
+                    if (!Directory.Exists(actualPath))
                     {
-                        dir = dir[..^1];
+                        return;
                     }
-                    if (dir != "")
+                    IEnumerable<string> subDirs = Directory.EnumerateDirectories(actualPath).Select(Path.GetFileName);
+                    List<Task> childTasks = [];
+                    foreach (string subDir in subDirs)
                     {
-                        (subDepth == 0 ? finalDirs : dirsConc).TryAdd(dir, dir);
-                    }
-                    if (subDepth > 0)
-                    {
-                        string actualPath = $"{path}/{dir}";
-                        actualPath = UserImageHistoryHelper.GetRealPathFor(session.User, actualPath, root: root);
-                        if (!Directory.Exists(actualPath))
+                        string subPath = dir == "" ? subDir : $"{dir}/{subDir}";
+                        if (isAllowed(subPath))
                         {
-                            return;
-                        }
-                        IEnumerable<string> subDirs = Directory.EnumerateDirectories(actualPath).Select(Path.GetFileName).OrderDescending();
-                        foreach (string subDir in subDirs)
-                        {
-                            string subPath = dir == "" ? subDir : $"{dir}/{subDir}";
-                            if (isAllowed(subPath))
-                            {
-                                addDirs(subPath, subDepth - 1);
-                            }
+                            childTasks.Add(Utilities.RunCheckedTask(async () => await addDirs(subPath, subDepth - 1), "t2i getlist add dir"));
                         }
                     }
-                }, "t2i getlist add dir"));
+                    await Task.WhenAll(childTasks);
+                }
             }
-            addDirs("", depth);
+            List<Task> topTasks = [ Utilities.RunCheckedTask(async () => await addDirs("", depth), "t2i getlist add dir") ];
             string rawRefPath = Path.GetRelativePath(root, path).Replace('\\', '/');
             if (!rawRefPath.EndsWith('/'))
             {
@@ -552,13 +550,10 @@ public static class T2IAPI
             {
                 if (specialFolder.StartsWith(rawRefPath))
                 {
-                    addDirs(specialFolder[rawRefPath.Length..], 1);
+                    topTasks.Add(Utilities.RunCheckedTask(async () => await addDirs(specialFolder[rawRefPath.Length..], 1), "t2i getlist add dir"));
                 }
             }
-            while (tasks.Any(t => !t.Value.IsCompleted))
-            {
-                Task.WaitAll([.. tasks.Values]);
-            }
+            Task.WaitAll([.. topTasks]);
             List<string> dirs = [.. dirsConc.Keys.OrderDescending()];
             if (sortReverse)
             {
