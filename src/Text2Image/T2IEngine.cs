@@ -161,13 +161,13 @@ namespace SwarmUI.Text2Image
         }
 
         /// <summary>Internal handler route to create an image based on a user request.</summary>
-        public static async Task CreateImageTask(T2IParamInput user_input, string batchId, Session.GenClaim claim, Action<JObject> output, Action<string> setError, bool isWS, float backendTimeoutMin, Action<ImageOutput, string> saveImages)
+        public static async Task CreateImageTask(T2IParamInput user_input, string batchId, Session.GenClaim claim, Action<JObject> output, Action<string> setError, bool isWS, float backendTimeoutMin, Func<ImageOutput, string, Task> saveImages)
         {
             await CreateImageTask(user_input, batchId, claim, output, setError, isWS, backendTimeoutMin, saveImages, true);
         }
 
         /// <summary>Internal handler route to create an image based on a user request.</summary>
-        public static async Task CreateImageTask(T2IParamInput user_input, string batchId, Session.GenClaim claim, Action<JObject> output, Action<string> setError, bool isWS, float backendTimeoutMin, Action<ImageOutput, string> saveImages, bool canCallTools)
+        public static async Task CreateImageTask(T2IParamInput user_input, string batchId, Session.GenClaim claim, Action<JObject> output, Action<string> setError, bool isWS, float backendTimeoutMin, Func<ImageOutput, string, Task> saveImages, bool canCallTools)
         {
             long timeStart = Environment.TickCount64;
             void sendStatus()
@@ -185,7 +185,7 @@ namespace SwarmUI.Text2Image
             int numImagesGenned = 0;
             long lastGenTime = Environment.TickCount64;
             string genTimeReport = "? failed!";
-            void handleFileOutput(ImageOutput img)
+            async Task handleFileOutput(ImageOutput img)
             {
                 lastGenTime = Environment.TickCount64;
                 if (img.GenTimeMS < 0)
@@ -216,7 +216,7 @@ namespace SwarmUI.Text2Image
                 {
                     (Task<MediaFile> imgTask, string metadata) = copyInput.SourceSession.ApplyMetadata(img.File, copyInput, numImagesGenned, true);
                     img.ActualFileTask = imgTask;
-                    saveImages(img, metadata);
+                    await saveImages(img, metadata);
                     numImagesGenned++;
                 }
             }
@@ -233,7 +233,7 @@ namespace SwarmUI.Text2Image
                         double cleanup = user_input.Get(T2IParamTypes.RegionalObjectCleanupFactor, 0);
                         if (cleanup == 0)
                         {
-                            handleFileOutput(new() { File = multiImg, IsReal = true, GenTimeMS = -1, RefuseImage = null });
+                            await handleFileOutput(new() { File = multiImg, IsReal = true, GenTimeMS = -1, RefuseImage = null });
                             return;
                         }
                         user_input.Set(T2IParamTypes.InitImageCreativity, cleanup);
@@ -286,15 +286,15 @@ namespace SwarmUI.Text2Image
                         return;
                     }
                     prepTime = Environment.TickCount64;
-                    await backend.Backend.GenerateLive(user_input, batchId, obj =>
+                    await backend.Backend.GenerateLive(user_input, batchId, async obj =>
                     {
                         if (obj is MediaFile file)
                         {
-                            handleFileOutput(new() { File = file });
+                            await handleFileOutput(new() { File = file });
                         }
                         else if (obj is ImageOutput imgOut)
                         {
-                            handleFileOutput(imgOut);
+                            await handleFileOutput(imgOut);
                         }
                         else
                         {
