@@ -14,6 +14,7 @@ using System.IO;
 
 namespace SwarmUI.Tests.WebAPI
 {
+    [Collection("Sequential")]
     public class BackendAPITests
     {
         public BackendAPITests()
@@ -34,10 +35,19 @@ namespace SwarmUI.Tests.WebAPI
 
         private Session CreateMockSession()
         {
-            var sessionHandler = new SessionHandler();
-            sessionHandler.Roles = new ConcurrentDictionary<string, Role>();
-            var user = new User(sessionHandler, new User.DatabaseEntry { ID = "test_user" });
-            return new Session() { User = user };
+            bool prev = Program.NoPersist;
+            Program.NoPersist = true; // Prevent SessionHandler from attempting to save anything to disk during initialization
+            try
+            {
+                var sessionHandler = new SessionHandler();
+                sessionHandler.Roles = new ConcurrentDictionary<string, Role>();
+                var user = new User(sessionHandler, new User.DatabaseEntry { ID = "test_user" });
+                return new Session() { User = user };
+            }
+            finally
+            {
+                Program.NoPersist = prev;
+            }
         }
 
         [Fact]
