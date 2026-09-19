@@ -582,8 +582,7 @@ public class ComfyUIRedirectHelper
                     dupRequest.Content.Headers.Add("Content-Type", context.Request.ContentType);
                     tasks.Add(webClient.SendAsync(dupRequest));
                 }
-                await Task.WhenAll(tasks);
-                List<HttpResponseMessage> responses = [.. tasks.Select(t => t.Result)];
+                HttpResponseMessage[] responses = await Task.WhenAll(tasks);
                 response = responses.FirstOrDefault(t => t.StatusCode == HttpStatusCode.OK);
                 response ??= responses.FirstOrDefault();
             }
@@ -610,8 +609,8 @@ public class ComfyUIRedirectHelper
                 {
                     requests.Add(localBack.Client.SendAsync(new(new(context.Request.Method), $"{localBack.WebAddress}/{path}")));
                 }
-                await Task.WhenAll(requests);
-                response = requests.Select(r => r.Result).FirstOrDefault(r => r.StatusCode == HttpStatusCode.OK) ?? requests.First().Result;
+                HttpResponseMessage[] responses = await Task.WhenAll(requests);
+                response = responses.FirstOrDefault(r => r.StatusCode == HttpStatusCode.OK) ?? responses[0];
             }
             else if ((path == "object_info" || path.StartsWith("object_info?") || path == "api/object_info" || path.StartsWith("api/object_info?")) && Program.ServerSettings.Performance.DoBackendDataCache)
             {

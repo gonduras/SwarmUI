@@ -203,7 +203,7 @@ public class WorkflowGenerator
         string clazz = CurrentCompatClass();
         return clazz is not null && clazz == "chroma";
     }
-    
+
     /// <summary>Returns true if the current model is Chroma Radiance.</summary>
     public bool IsChromaRadiance()
     {
@@ -1737,7 +1737,7 @@ public class WorkflowGenerator
         {
             defscheduler ??= "beta";
         }
-            bool willCascadeFix = false;
+        bool willCascadeFix = false;
         JArray cascadeModel = null;
         if (!rawSampler && IsCascade() && FinalLoadedModel.Name.Contains("stage_c") && Program.MainSDModels.Models.TryGetValue(FinalLoadedModel.Name.Replace("stage_c", "stage_b"), out T2IModel bModel))
         {
