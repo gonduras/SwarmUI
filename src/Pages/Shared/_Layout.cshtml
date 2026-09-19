@@ -6,10 +6,15 @@
     <title id="page_title">@ViewData["Title"] - SwarmUI - @Program.ServerSettings.UserAuthorization.InstanceTitle</title>
     @{
         string themeId = "modern_dark";
-        // TODO: Identify user by auth header and use their settings to determine theme
-        if (ViewContext.HttpContext.Request.Cookies.TryGetValue("sui_theme_id", out string themeCookie) && Program.Web.RegisteredThemes.ContainsKey(themeCookie)) {
+        if (ViewContext.HttpContext.Items.TryGetValue("Session", out object sessionObj) && sessionObj is SwarmUI.Accounts.Session session && session.User is not null)
+        {
+            themeId = session.User.Settings.UI.Theme;
+        }
+        else if (ViewContext.HttpContext.Request.Cookies.TryGetValue("sui_theme_id", out string themeCookie) && Program.Web.RegisteredThemes.ContainsKey(themeCookie))
+        {
             themeId = themeCookie;
         }
+
         WebServer.ThemeData theme = Program.Web.RegisteredThemes[themeId];
         string bsUrl = theme.IsDark ? "css/bootstrap.min.css" : "css/bootstrap_light.min.css";
         <link rel="stylesheet" id="bs_theme_header" href="@bsUrl" />

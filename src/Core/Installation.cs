@@ -45,7 +45,7 @@ public class Installation
         if (Program.Web.RegisteredThemes.ContainsKey(theme))
         {
             await Output($"Setting theme to {theme}.");
-            Program.ServerSettings.DefaultUser.Theme = theme;
+            Program.ServerSettings.DefaultUser.UI.Theme = theme;
         }
         else
         {
@@ -330,7 +330,7 @@ public class Installation
         InstallSocket = socket;
         await Output("Installation request received, processing...");
         await Theme(theme);
-        Program.ServerSettings.DefaultUser.Language = language;
+        Program.ServerSettings.DefaultUser.UI.Language = language;
         await InstalledFor(installed_for);
         StepsThusFar = 1;
         TotalSteps = 4;
