@@ -507,9 +507,18 @@ public class Program
         _ = Utilities.RunCheckedTask(() => Shutdown(42), "shutdown");
     }
 
+    /// <summary>Test hook for intercepting shutdown requests. If set, this will be called instead of proceeding with the actual shutdown.</summary>
+    public static Action<int> TestShutdownHook = null;
+
     /// <summary>Main shutdown handler. Tells everything to stop.</summary>
     public static void Shutdown(int code = 0)
     {
+        if (TestShutdownHook != null)
+        {
+            TestShutdownHook(code);
+            return;
+        }
+
         if (HasShutdown)
         {
             return;
