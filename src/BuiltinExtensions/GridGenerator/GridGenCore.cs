@@ -560,7 +560,7 @@ public partial class GridGenCore
             }
             if (Grid.PublishMetadata)
             {
-                results["metadata"] = null; // TODO: webdata_get_base_param_data(p)
+                results["metadata"] = Grid.InitialParams.GenParameterMetadata();
             }
             JArray axes = [];
             foreach (Axis axis in Grid.Axes)
