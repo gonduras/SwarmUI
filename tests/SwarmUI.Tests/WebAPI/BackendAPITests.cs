@@ -1,26 +1,46 @@
-using Xunit;
-using SwarmUI.WebAPI;
-using SwarmUI.Core;
-using SwarmUI.Utils;
-using SwarmUI.Accounts;
-using SwarmUI.Backends;
-using SwarmUI.DataHolders;
-using SwarmUI.Text2Image;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using LiteDB;
+using Xunit;
+using SwarmUI.Core;
+using SwarmUI.Accounts;
+using SwarmUI.Utils;
+using FreneticUtilities.FreneticExtensions;
+using SwarmUI.WebAPI;
+using SwarmUI.Backends;
+using SwarmUI.Text2Image;
 
 namespace SwarmUI.Tests.WebAPI
 {
-    public class BackendAPITests
+    [Collection("Sequential")]
+    public class BackendAPITests : IDisposable
     {
+        private readonly string _tempDataDir;
+        private readonly SessionHandler _sessionHandler;
+
         public BackendAPITests()
         {
-            if (!Directory.Exists("Data"))
+            _tempDataDir = Path.Combine(Path.GetTempPath(), "SwarmUI_Test_" + Guid.NewGuid().ToString());
+            Directory.CreateDirectory(_tempDataDir);
+
+            Program.DataDir = _tempDataDir;
+            Program.ServerSettings = new Settings();
+            Program.NoPersist = false;
+
+            _sessionHandler = new SessionHandler();
+            _sessionHandler.Roles = new ConcurrentDictionary<string, Role>();
+        }
+
+        public void Dispose()
+        {
+            _sessionHandler.Shutdown();
+            if (Directory.Exists(_tempDataDir))
             {
-                Directory.CreateDirectory("Data");
+                Directory.Delete(_tempDataDir, true);
             }
         }
 
@@ -28,15 +48,13 @@ namespace SwarmUI.Tests.WebAPI
         {
             public override Task Init() => Task.CompletedTask;
             public override Task Shutdown() => Task.CompletedTask;
-            public override Task<Image[]> Generate(T2IParamInput user_input) => Task.FromResult(new Image[0]);
+            public override Task<SwarmUI.Utils.Image[]> Generate(T2IParamInput user_input) => Task.FromResult(new SwarmUI.Utils.Image[0]);
             public override IEnumerable<string> SupportedFeatures => new string[0];
         }
 
         private Session CreateMockSession()
         {
-            var sessionHandler = new SessionHandler();
-            sessionHandler.Roles = new ConcurrentDictionary<string, Role>();
-            var user = new User(sessionHandler, new User.DatabaseEntry { ID = "test_user" });
+            var user = new User(_sessionHandler, new User.DatabaseEntry { ID = "test_user" });
             return new Session() { User = user };
         }
 
