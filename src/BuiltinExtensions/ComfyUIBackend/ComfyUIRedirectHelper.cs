@@ -468,17 +468,39 @@ public class ComfyUIRedirectHelper
                                     if (await Program.Backends.TryToScaleANewBackend(true))
                                     {
                                         Logs.Info("Comfy backend direct prompt request failed due to no available backends for user, causing new backends to load...");
-                                        // TODO: Wait for the backend then re-prompt.
-                                        // As a placeholder, we kill the websocket so the user knows they'll need to retry.
-                                        givePostError("[SwarmUI] No backend available, but auto-scaling was triggered, and a new backend is loading. Please wait a moment, then retry.");
+                                        user.Lock.Release();
+                                        try
+                                        {
+                                            long start = Environment.TickCount64;
+                                            while (Environment.TickCount64 - start < 5 * 60 * 1000)
+                                            {
+                                                await Task.Delay(TimeSpan.FromSeconds(1), Program.GlobalProgramCancel);
+                                                if (user.Clients.Values.Any(c => c.Backend.MaxUsages > 0 && c.Backend.Status == BackendStatus.RUNNING))
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        catch (OperationCanceledException)
+                                        {
+                                        }
+                                        await user.Lock.WaitAsync();
+                                        available = user.Clients.Values.Where(c => c.Backend.MaxUsages > 0 && c.Backend.Status == BackendStatus.RUNNING).ToArray().Shift(user.BackendOffset);
+                                        if (available.Length == 0)
+                                        {
+                                            givePostError("[SwarmUI] No backend available, but auto-scaling was triggered, and a new backend is loading. Please wait a moment, then retry.");
+                                            await user.Socket.CloseAsync(WebSocketCloseStatus.InternalServerError, null, Program.GlobalProgramCancel);
+                                            await user.Close();
+                                            return;
+                                        }
                                     }
                                     else
                                     {
                                         givePostError("[SwarmUI] No functional comfy backend available to run this request.");
+                                        await user.Socket.CloseAsync(WebSocketCloseStatus.InternalServerError, null, Program.GlobalProgramCancel);
+                                        await user.Close();
+                                        return;
                                     }
-                                    await user.Socket.CloseAsync(WebSocketCloseStatus.InternalServerError, null, Program.GlobalProgramCancel);
-                                    await user.Close();
-                                    return;
                                 }
                                 ComfyClientData client = available.MinBy(c => c.QueueRemaining);
                                 if (available.All(c => c.QueueRemaining > 0))
