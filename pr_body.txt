@@ -1,0 +1,10 @@
+🎯 **What:**
+Added comprehensive test coverage for `NvidiaUtil.QueryNvidia()` when the `nvidia-smi` query fails with an exception, which was previously a hard-to-test code path due to the need for a complex environment setup. Additionally, a `TestShutdownHook` was introduced in `Program.cs` to allow testing code paths that request a system restart (such as GPU driver crashes) without actually shutting down the test runner.
+
+📊 **Coverage:**
+- Validated that `HasNvidiaGPU` is set to false correctly on failure.
+- Validated that a system restart is properly requested when there was a previous valid query AND `RestartOnGpuCriticalError` is enabled.
+- Validated that a system restart is NOT requested when `RestartOnGpuCriticalError` is disabled.
+
+✨ **Result:**
+The previously uncovered exception handling in `NvidiaUtil` is now fully tested, making future modifications to hardware query behavior much safer.
