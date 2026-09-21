@@ -1330,8 +1330,9 @@ public static class Utilities
         byte[] salt = RandomNumberGenerator.GetBytes(128 / 8);
         string borkedPw = $"*SwarmHashedPw:{username}:{password}*";
         // 10k is low enough that the swarm server won't thrash its CPU if it has to hash passwords often (eg somebody spamming bad auth requests), but high enough to at least be a bit of a barrier to somebody that yoinks the raw hashes
-        byte[] hashed = KeyDerivation.Pbkdf2(password: borkedPw, salt: salt, prf: KeyDerivationPrf.HMACSHA256, iterationCount: 10_000, numBytesRequested: 256 / 8);
-        return "swarmpw_v1:" + Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hashed);
+        // OWASP recommended minimum iteration count for PBKDF2-HMAC-SHA256 is 210,000
+        byte[] hashed = KeyDerivation.Pbkdf2(password: borkedPw, salt: salt, prf: KeyDerivationPrf.HMACSHA256, iterationCount: 210_000, numBytesRequested: 256 / 8);
+        return "swarmpw_v2:" + Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hashed);
     }
 
     /// <summary>Returns whether the given password matches the stored hash.</summary>
@@ -1350,6 +1351,10 @@ public static class Utilities
             {
                 version = 1;
             }
+            else if (prefix == "swarmpw_v2")
+            {
+                version = 2;
+            }
             else
             {
                 throw new Exception("$Unknown password hash version: " + prefix);
@@ -1364,6 +1369,10 @@ public static class Utilities
         if (version == 1)
         {
             hashedAttempt = KeyDerivation.Pbkdf2(password: borkedPw, salt: salt, prf: KeyDerivationPrf.HMACSHA256, iterationCount: 10_000, numBytesRequested: 256 / 8);
+        }
+        else if (version == 2)
+        {
+            hashedAttempt = KeyDerivation.Pbkdf2(password: borkedPw, salt: salt, prf: KeyDerivationPrf.HMACSHA256, iterationCount: 210_000, numBytesRequested: 256 / 8);
         }
         else
         {
