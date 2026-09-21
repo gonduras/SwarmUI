@@ -19,8 +19,38 @@ public class AutoWebUISelfStartBackend : AutoWebUIAPIAbstractBackend
         [ConfigComment("Any arguments to include in the launch script.")]
         public string ExtraArgs = "";
 
+        public class GpuIdImpl : SettingsOptionsAttribute.AbstractImpl
+        {
+            public override string[] GetOptions
+            {
+                get
+                {
+                    NvidiaUtil.NvidiaInfo[] gpus = NvidiaUtil.QueryNvidia();
+                    if (gpus is null || gpus.Length == 0)
+                    {
+                        return ["0"];
+                    }
+                    return [.. gpus.Select(g => g.ID.ToString())];
+                }
+            }
+
+            public override string[] Names
+            {
+                get
+                {
+                    NvidiaUtil.NvidiaInfo[] gpus = NvidiaUtil.QueryNvidia();
+                    if (gpus is null || gpus.Length == 0)
+                    {
+                        return ["0"];
+                    }
+                    return [.. gpus.Select(g => $"{g.ID} ({g.GPUName})")];
+                }
+            }
+        }
+
         [ConfigComment("Which GPU to use, if multiple are available.")]
-        public int GPU_ID = 0; // TODO: Determine GPU count and provide correct max
+        [SettingsOptions(Impl = typeof(GpuIdImpl))]
+        public int GPU_ID = 0;
     }
 
     public Process RunningProcess;
