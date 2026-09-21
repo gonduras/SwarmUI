@@ -390,8 +390,8 @@ public class ComfyUIRedirectHelper
                     byte[] recvBuf = new byte[20 * 1024 * 1024];
                     while (true)
                     {
-                        // TODO: Should this input be allowed to remain open forever? Need a timeout, but the ComfyUI websocket doesn't seem to keepalive properly.
-                        WebSocketReceiveResult received = await socket.ReceiveAsync(recvBuf, Program.GlobalProgramCancel);
+                        using CancellationTokenSource cancel = Utilities.TimedCancel(TimeSpan.FromMinutes(5));
+                        WebSocketReceiveResult received = await socket.ReceiveAsync(recvBuf, cancel.Token);
                         foreach (ComfyClientData client in user.Clients.Values)
                         {
                             if (received.MessageType != WebSocketMessageType.Close)
