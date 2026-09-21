@@ -132,11 +132,6 @@ public class Program
             SettingsFilePath = GetCommandLineFlag("settings_file", $"{DataDir}/Settings.fds");
             LoadSettingsFile();
             RebuildDataDir();
-            // TODO: Legacy format patch from Alpha 0.5! Remove this before 1.0.
-            if (ServerSettings.DefaultUser.FileFormat.ImageFormat == "jpg")
-            {
-                ServerSettings.DefaultUser.FileFormat.ImageFormat = "JPG";
-            }
             // TODO: Legacy patch from Beta 0.9.4.
             if (ServerSettings.IsInstalled && string.IsNullOrWhiteSpace(ServerSettings.InstallDate))
             {
