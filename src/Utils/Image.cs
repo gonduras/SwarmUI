@@ -77,7 +77,7 @@ public class Image : ImageFile
         }
         else if (data.Length == 0)
         {
-              throw new ArgumentException("Data is empty!", nameof(data));
+            throw new ArgumentException("Data is empty!", nameof(data));
         }
         RawData = data;
     }
