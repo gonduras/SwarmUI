@@ -193,6 +193,30 @@ class GenTabLayout {
         }
     }
     
+    animateSwipe(actionUpdate, actionComplete) {
+        let duration = 250;
+        let startTime = null;
+        let step = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / duration;
+            if (progress > 1) progress = 1;
+            let ease = 1 - Math.pow(1 - progress, 3);
+
+            actionUpdate(ease);
+            this.reapplyPositions();
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                if (actionComplete) {
+                    actionComplete();
+                    this.reapplyPositions();
+                }
+            }
+        };
+        requestAnimationFrame(step);
+    }
+
     /** Does the full position update logic. */
     reapplyPositions() {
         this.isSmallWindow = this.mobileDesktopLayout == 'auto' ? window.innerWidth < 768 : this.mobileDesktopLayout == 'mobile';
@@ -462,43 +486,73 @@ class GenTabLayout {
                 let allShut = this.leftShut && this.rightSectionBarPos <= 0 && this.bottomShut;
                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
                     if (Math.abs(deltaX) > this.minSwipeDelta) {
-                        // TODO: Mobile bar shuts need a smooth animation
                         // Swipe from anywhere towards left = close left bar
                         if (!this.leftShut && deltaX < 0) {
-                            this.setLeftShut(true);
-                            this.leftSectionBarPos = 0;
-                            this.reapplyPositions();
+                            let startPos = this.inputSidebar.offsetWidth;
+                            this.animateSwipe((ease) => {
+                                this.leftSectionBarPos = startPos * (1 - ease);
+                            }, () => {
+                                this.setLeftShut(true);
+                                this.leftSectionBarPos = 0;
+                            });
                         }
                         // Swipe from anywhere towards right = close right bar
                         else if (this.rightSectionBarPos > 0 && deltaX > 0) {
-                            this.rightSectionBarPos = 0;
-                            this.reapplyPositions();
+                            let startPos = this.rightSectionBarPos;
+                            this.animateSwipe((ease) => {
+                                this.rightSectionBarPos = startPos * (1 - ease);
+                            }, () => {
+                                this.rightSectionBarPos = 0;
+                            });
                         }
                         // Swipe from left inward = open left bar
                         else if (this.swipeStartX < window.innerWidth / 6 && deltaX > 0 && allShut) {
                             this.setLeftShut(false);
-                            this.leftSectionBarPos = window.innerWidth;
-                            this.reapplyPositions();
+                            let targetPos = window.innerWidth;
+                            this.animateSwipe((ease) => {
+                                this.leftSectionBarPos = targetPos * ease;
+                            }, () => {
+                                this.leftSectionBarPos = targetPos;
+                            });
                         }
                         // Swipe from right inward = open right bar
                         else if (this.swipeStartX > window.innerWidth * 5 / 6 && deltaX < 0 && allShut) {
-                            this.rightSectionBarPos = window.innerWidth;
-                            this.reapplyPositions();
+                            let targetPos = window.innerWidth;
+                            this.animateSwipe((ease) => {
+                                this.rightSectionBarPos = targetPos * ease;
+                            }, () => {
+                                this.rightSectionBarPos = targetPos;
+                            });
                         }
                     }
                 }
                 else {
                     if (Math.abs(deltaY) > this.minSwipeDelta) {
+                        let rootTop = this.t2iRootDiv.getBoundingClientRect().top;
+                        let bottomBarHeight = this.bottomInfoBar.offsetHeight;
+                        let fontRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+                        let addedHeightNum = this.isSmallWindow ? 0.4 * fontRem : 2.8 * fontRem;
+                        let closedPos = rootTop + addedHeightNum + bottomBarHeight;
+
                         // Swipe from anywhere towards bottom = close bottom bar
                         if (!this.bottomShut && deltaY > 0) {
-                            this.setBottomShut(true);
-                            this.reapplyPositions();
+                            let startPos = this.bottomSectionBarPos == -1 ? window.innerHeight * 0.5 : this.bottomSectionBarPos;
+                            this.animateSwipe((ease) => {
+                                this.bottomSectionBarPos = startPos + (closedPos - startPos) * ease;
+                            }, () => {
+                                this.setBottomShut(true);
+                                this.bottomSectionBarPos = -1;
+                            });
                         }
                         // Swipe from bottom inward = open bottom bar
                         else if (this.swipeStartY > window.innerHeight * 5 / 6 && deltaY < 0 && allShut) {
+                            let targetPos = window.innerHeight + 200;
                             this.setBottomShut(false);
-                            this.bottomSectionBarPos = window.innerHeight + 200;
-                            this.reapplyPositions();
+                            this.animateSwipe((ease) => {
+                                this.bottomSectionBarPos = closedPos + (targetPos - closedPos) * ease;
+                            }, () => {
+                                this.bottomSectionBarPos = targetPos;
+                            });
                         }
                     }
                 }
