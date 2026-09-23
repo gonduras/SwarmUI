@@ -148,6 +148,7 @@ class PromptTabCompleteClass {
         this.lastWord = null;
         this.lastResults = null;
         this.blockInput = false;
+        this.autoRetryCount = 0;
     }
 
     getOrderedMatches(set, prefixLow) {
@@ -316,12 +317,19 @@ class PromptTabCompleteClass {
         if (possible.length == 0) {
             return;
         }
-        if (possible.length == 1 && possible[0] == '\n<AUTO-RETRY>') { // TODO: Spam limiter for in case auto-retry gets stuck on?
+        if (possible.length == 1 && possible[0] == '\n<AUTO-RETRY>') {
+            this.autoRetryCount++;
+            if (this.autoRetryCount > 50) {
+                console.log("Auto-retry stuck, aborting tab complete.");
+                this.autoRetryCount = 0;
+                return;
+            }
             setTimeout(() => {
                 this.onInput(box);
             }, 100);
             return;
         }
+        this.autoRetryCount = 0;
         let buttons = [];
         let prompt = this.getPromptBeforeCursor(box);
         let lastBrace = prompt.lastIndexOf('<');
