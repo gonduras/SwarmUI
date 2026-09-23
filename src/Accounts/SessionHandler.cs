@@ -17,7 +17,7 @@ public class SessionHandler
     public int SessionIDLength = 40; // TODO: Configurable
 
     /// <summary>How long to store sessions for before considering inactive and deleting.</summary>
-    public TimeSpan MaxSessionAge = TimeSpan.FromDays(31); // TODO: Configurable
+    public TimeSpan MaxSessionAge => TimeSpan.FromDays(Program.ServerSettings.UserAuthorization.SessionTimeoutDays);
 
     /// <summary>Map of currently tracked sessions by ID.</summary>
     public ConcurrentDictionary<string, Session> Sessions = new();
