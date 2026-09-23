@@ -95,6 +95,9 @@ public class Settings : AutoConfiguration
     /// <summary>Settings related to authorization.</summary>
     public class UserAuthorizationData : AutoConfiguration
     {
+        [ConfigComment("How long in days to store sessions for before considering inactive and deleting.\nDefaults to 31 days.")]
+        public int MaxSessionAgeDays = 31;
+
         [ConfigComment("If true, Swarm will require users to log in or use an API key to access the UI. If false, the UI will be open to anyone who can connect to it.\nDefaults to false.\nMake sure you know your own admin account login before enabling this!")]
         public bool AuthorizationRequired = false;
 

@@ -16,9 +16,6 @@ public class SessionHandler
     /// <summary>How long the random session ID tokens should be.</summary>
     public int SessionIDLength = 40; // TODO: Configurable
 
-    /// <summary>How long to store sessions for before considering inactive and deleting.</summary>
-    public TimeSpan MaxSessionAge = TimeSpan.FromDays(31); // TODO: Configurable
-
     /// <summary>Map of currently tracked sessions by ID.</summary>
     public ConcurrentDictionary<string, Session> Sessions = new();
 
@@ -267,7 +264,7 @@ public class SessionHandler
         {
             return;
         }
-        long cutOffTimeUTC = DateTimeOffset.UtcNow.Subtract(MaxSessionAge).ToUnixTimeSeconds();
+        long cutOffTimeUTC = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(Program.ServerSettings.UserAuthorization.MaxSessionAgeDays)).ToUnixTimeSeconds();
         lock (DBLock)
         {
             foreach (Session.DatabaseEntry sess in SessionDatabase.FindAll())
