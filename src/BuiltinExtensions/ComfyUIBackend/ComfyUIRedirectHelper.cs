@@ -626,7 +626,7 @@ public class ComfyUIRedirectHelper
             {
                 HttpResponseMessage rawResponse = await webClient.GetAsync($"{webAddress}/{path}");
                 string remoteUserThemeText = rawResponse.StatusCode == HttpStatusCode.OK ? await rawResponse.Content.ReadAsStringAsync() : "";
-                string theme = swarmUser.Settings.Theme ?? Program.ServerSettings.DefaultUser.Theme;
+                string theme = swarmUser.Settings.UI.Theme ?? Program.ServerSettings.DefaultUser.UI.Theme;
                 if (Program.Web.RegisteredThemes.ContainsKey(theme))
                 {
                     string themeText = ComfyThemeData.GetOrCreate(theme, () =>
