@@ -145,7 +145,7 @@ public static class OutputMetadataTracker
     }
 
     /// <summary>Get the preview bytes for the given image, going through a cache manager.</summary>
-    public static OutputPreviewEntry GetOrCreatePreviewFor(string file)
+    public static async Task<OutputPreviewEntry> GetOrCreatePreviewFor(string file)
     {
         file = file.Replace('\\', '/');
         string ext = file.AfterLast('.');
@@ -252,7 +252,7 @@ public static class OutputMetadataTracker
                 }
                 else if (ExtensionsForFfmpegables.Contains(ext))
                 {
-                    UserImageHistoryHelper.DoFfmpegPreviewGeneration(file).Wait();
+                    await UserImageHistoryHelper.DoFfmpegPreviewGeneration(file);
                     altExists = Program.ServerSettings.UI.AllowAnimatedPreviews && File.Exists(altPreview);
                     if (!altExists)
                     {

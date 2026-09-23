@@ -249,7 +249,7 @@ public class Session : IEquatable<Session>
                     {
                         File.WriteAllBytes(fullPathNoExt + ".swarm.json", metadata.EncodeUTF8());
                     }
-                    OutputMetadataTracker.GetOrCreatePreviewFor(fullPath.Replace('\\', '/'));
+                    await OutputMetadataTracker.GetOrCreatePreviewFor(fullPath.Replace('\\', '/'));
                     Logs.Debug($"Saved an output file as '{fullPath}'");
                     await Task.Delay(TimeSpan.FromSeconds(10)); // (Give time for WebServer to read data from cache rather than having to reload from file for first read)
                     StillSavingFiles.TryRemove(fullPath, out _);
