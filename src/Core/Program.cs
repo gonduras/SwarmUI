@@ -570,13 +570,6 @@ public class Program
             Logs.Error($"Error loading settings file: {ex.ReadableString()}");
             return;
         }
-        // TODO: Legacy format patch from Beta 0.6! Remove this before 1.0.
-        string legacyLogLevel = section.GetString("LogLevel", null);
-        string newLogLevel = section.GetString("Logs.LogLevel", null);
-        if (legacyLogLevel is not null && newLogLevel is null)
-        {
-            section.Set("Logs.LogLevel", legacyLogLevel);
-        }
         // TODO: Legacy format patch from Beta 0.9!
         bool? modelPerFolder = section.GetBool("Paths.ModelMetadataPerFolder", null);
         if (modelPerFolder.HasValue)
