@@ -14,7 +14,12 @@ public abstract class Extension
     public string ExtensionName;
 
     /// <summary>Version ID for this extension.</summary>
-    public string Version = "(Unset)"; // TODO: Auto-set this validly somehow
+    public string Version;
+
+    public Extension()
+    {
+        Version = GetType().Assembly.GetName().Version?.ToString() ?? "(Unset)";
+    }
 
     /// <summary>Author of this extension.</summary>
     public string ExtensionAuthor = "(Unknown)";
