@@ -81,11 +81,11 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
             string response = await Utilities.RunGitProcess($"clone {url}", nodePath);
             AddLoadStatus($"Node clone response for {folderName}: {response.Trim()}");
             string reqFile = $"{nodePath}/{folderName}/requirements.txt";
-            ComfyUISelfStartBackend[] backends = [.. Program.Backends.RunningBackendsOfType<ComfyUISelfStartBackend>()];
+            ComfyUISelfStartBackend[] backends = [.. BackendHandler.Instance.RunningBackendsOfType<ComfyUISelfStartBackend>()];
             if (File.Exists(reqFile) && backends.Any())
             {
                 AddLoadStatus("Will shutdown any/all comfy backends to allow an install...");
-                Task[] tasks = [.. backends.Select(b => Program.Backends.ShutdownBackendCleanly(b.BackendData))];
+                Task[] tasks = [.. backends.Select(b => BackendHandler.Instance.ShutdownBackendCleanly(b.BackendData))];
                 await Task.WhenAll(tasks);
                 AddLoadStatus("Pre-shutdown done.");
                 try
@@ -114,7 +114,7 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
                     foreach (ComfyUISelfStartBackend backend in backends)
                     {
                         AddLoadStatus($"Will re-start backend {backend.BackendData.ID}...");
-                        Program.Backends.DoInitBackend(backend.BackendData);
+                        BackendHandler.Instance.DoInitBackend(backend.BackendData);
                     }
                 }
                 return backends;

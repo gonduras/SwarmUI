@@ -3,6 +3,7 @@ using FreneticUtilities.FreneticToolkit;
 using Newtonsoft.Json.Linq;
 using SwarmUI.Accounts;
 using SwarmUI.Core;
+using SwarmUI.Backends;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 using SwarmUI.WebAPI;
@@ -235,7 +236,7 @@ public class GridGeneratorExtension : Extension
             {
                 data.Rendering.Add(t);
             }
-            int requests = Program.Backends.QueuedRequests;
+            int requests = BackendHandler.Instance.QueuedRequests;
             if (requests < Program.ServerSettings.Backends.MaxRequestsForcedOrder)
             {
                 Logs.Debug($"Grid Gen micro-pausing to maintain order as {requests} < {Program.ServerSettings.Backends.MaxRequestsForcedOrder}");

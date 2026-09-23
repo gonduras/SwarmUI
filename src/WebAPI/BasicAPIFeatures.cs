@@ -344,8 +344,8 @@ public static class BasicAPIFeatures
     /// <summary>Gets current session status. Not an API call.</summary>
     public static JObject GetCurrentStatusRaw(Session session)
     {
-        JObject backendStatus = Program.Backends.CurrentBackendStatus.GetValue();
-        string[] features = [.. Program.Backends.GetAllSupportedFeatures()];
+        JObject backendStatus = BackendHandler.Instance.CurrentBackendStatus.GetValue();
+        string[] features = [.. BackendHandler.Instance.GetAllSupportedFeatures()];
         Interlocked.MemoryBarrier();
         JObject stats = new()
         {

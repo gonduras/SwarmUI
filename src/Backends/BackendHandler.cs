@@ -16,6 +16,8 @@ namespace SwarmUI.Backends;
 /// <summary>Central manager for available backends.</summary>
 public class BackendHandler
 {
+    /// <summary>Central instance.</summary>
+    public static BackendHandler Instance;
     /// <summary>Currently loaded backends. Might not all be valid.</summary>
     public ConcurrentDictionary<int, T2IBackendData> T2IBackends = new();
 

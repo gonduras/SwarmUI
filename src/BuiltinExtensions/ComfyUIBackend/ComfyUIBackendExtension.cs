@@ -179,7 +179,7 @@ public class ComfyUIBackendExtension : Extension
         List<Task> tasks = [];
         foreach (ComfyUIAPIAbstractBackend backend in RunningComfyBackends)
         {
-            tasks.Add(Program.Backends.ReloadBackend(backend.BackendData));
+            tasks.Add(BackendHandler.Instance.ReloadBackend(backend.BackendData));
         }
         await Task.WhenAll(tasks);
     }
@@ -289,7 +289,7 @@ public class ComfyUIBackendExtension : Extension
         return null;
     }
 
-    public static IEnumerable<ComfyUIAPIAbstractBackend> RunningComfyBackends => Program.Backends.RunningBackendsOfType<ComfyUIAPIAbstractBackend>();
+    public static IEnumerable<ComfyUIAPIAbstractBackend> RunningComfyBackends => BackendHandler.Instance.RunningBackendsOfType<ComfyUIAPIAbstractBackend>();
 
     public static string[] ExampleWorkflowNames;
 
@@ -409,11 +409,11 @@ public class ComfyUIBackendExtension : Extension
     public void OnModelPathsChanged()
     {
         ComfyUISelfStartBackend.IsComfyModelFileEmitted = false;
-        foreach (ComfyUISelfStartBackend backend in Program.Backends.RunningBackendsOfType<ComfyUISelfStartBackend>())
+        foreach (ComfyUISelfStartBackend backend in BackendHandler.Instance.RunningBackendsOfType<ComfyUISelfStartBackend>())
         {
             if (backend.IsEnabled)
             {
-                Program.Backends.ReloadBackend(backend.BackendData).Wait(Program.GlobalProgramCancel);
+                BackendHandler.Instance.ReloadBackend(backend.BackendData).Wait(Program.GlobalProgramCancel);
             }
         }
     }
@@ -795,8 +795,8 @@ public class ComfyUIBackendExtension : Extension
         SetClipDevice = T2IParamTypes.Register<string>(new("Set CLIP Device", "Override the hardware device that text encoders run on.",
             "cpu", FeatureFlag: "set_clip_device", Group: T2IParamTypes.GroupAdvancedModelAddons, IsAdvanced: true, Toggleable: true, GetValues: (_) => SetClipDevices, OrderPriority: 70
             ));
-        BackendApiType = Program.Backends.RegisterBackendType<ComfyUIAPIBackend>("comfyui_api", "ComfyUI API By URL", "A backend powered by a pre-existing installation of ComfyUI, referenced via API base URL.", true);
-        BackendSelfStartType = Program.Backends.RegisterBackendType<ComfyUISelfStartBackend>("comfyui_selfstart", "ComfyUI Self-Starting", "A backend powered by a pre-existing installation of the ComfyUI, automatically launched and managed by this UI server.", isStandard: true);
+        BackendApiType = BackendHandler.Instance.RegisterBackendType<ComfyUIAPIBackend>("comfyui_api", "ComfyUI API By URL", "A backend powered by a pre-existing installation of ComfyUI, referenced via API base URL.", true);
+        BackendSelfStartType = BackendHandler.Instance.RegisterBackendType<ComfyUISelfStartBackend>("comfyui_selfstart", "ComfyUI Self-Starting", "A backend powered by a pre-existing installation of the ComfyUI, automatically launched and managed by this UI server.", isStandard: true);
         SwarmSwarmBackend.ValidityChecks[BackendApiType.ID] = (backend, input) => ComfyUIAPIAbstractBackend.TryIsValid(input, backend.ExtensionData.GetValueOrDefault("ComfyNodeTypes", null) as HashSet<string>);
         SwarmSwarmBackend.ValidityChecks[BackendSelfStartType.ID] = SwarmSwarmBackend.ValidityChecks[BackendApiType.ID];
         ComfyUIWebAPI.Register();
@@ -817,7 +817,7 @@ public class ComfyUIBackendExtension : Extension
         {
             yield return new(ComfyUIAPIAbstractBackend.HttpClient, backend.APIAddress, backend.WebAddress, backend);
         }
-        foreach (SwarmSwarmBackend swarmBackend in Program.Backends.RunningBackendsOfType<SwarmSwarmBackend>().Where(b => b.LinkedRemoteBackendType is not null && b.LinkedRemoteBackendType.StartsWith("comfyui_")))
+        foreach (SwarmSwarmBackend swarmBackend in BackendHandler.Instance.RunningBackendsOfType<SwarmSwarmBackend>().Where(b => b.LinkedRemoteBackendType is not null && b.LinkedRemoteBackendType.StartsWith("comfyui_")))
         {
             string addr = $"{swarmBackend.Address}/ComfyBackendDirect";
             yield return new(SwarmSwarmBackend.HttpClient, addr, addr, swarmBackend);

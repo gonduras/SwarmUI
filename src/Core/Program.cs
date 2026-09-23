@@ -24,8 +24,7 @@ namespace SwarmUI.Core;
 /// <summary>Class that handles the core entry-point access to the program, and initialization of program layers.</summary>
 public class Program
 {
-    /// <summary>Central store of available backends.</summary>
-    public static BackendHandler Backends; // TODO: better location for central values
+
 
     /// <summary>Central store of web sessions.</summary>
     public static SessionHandler Sessions;
@@ -289,7 +288,7 @@ public class Program
         BuildModelLists();
         CommonModels.RegisterCoreSet();
         T2IParamTypes.RegisterDefaults();
-        Backends = new()
+        BackendHandler.Instance = new()
         {
             SaveFilePath = GetCommandLineFlag("backends_file", $"{DataDir}/Backends.fds")
         };
@@ -312,7 +311,7 @@ public class Program
         UserSoundHelper.Init();
         timer.Check("Model listing");
         Logs.Init("Loading backends...");
-        Backends.Load();
+        BackendHandler.Instance.Load();
         timer.Check("Backends");
         Logs.Init("Prepping API...");
         BasicAPIFeatures.Register();
@@ -375,10 +374,10 @@ public class Program
                 {
                     return;
                 }
-                if (Backends.BackendsEdited)
+                if (BackendHandler.Instance.BackendsEdited)
                 {
-                    Backends.BackendsEdited = false;
-                    Backends.Save();
+                    BackendHandler.Instance.BackendsEdited = false;
+                    BackendHandler.Instance.Save();
                 }
             }
         });
@@ -524,7 +523,7 @@ public class Program
         Logs.Verbose("Shutdown webserver...");
         WebServer.WebApp?.StopAsync().Wait();
         Logs.Verbose("Shutdown backends...");
-        Backends?.Shutdown();
+        BackendHandler.Instance?.Shutdown();
         Logs.Verbose("Shutdown sessions...");
         Sessions?.Shutdown();
         Logs.Verbose("Shutdown proxy handler...");

@@ -226,7 +226,7 @@ public class Installation
             gpu = mostVRAM.ID;
         }
         await Output("Enabling ComfyUI...");
-        Program.Backends.AddNewOfType(Program.Backends.BackendTypes["comfyui_selfstart"], new ComfyUISelfStartBackend.ComfyUISelfStartSettings() { StartScript = path, GPU_ID = $"{gpu}", ExtraArgs = extraArgs.Trim(), EnablePreviews = enablePreviews ? "true" : "false"});
+        BackendHandler.Instance.AddNewOfType(BackendHandler.Instance.BackendTypes["comfyui_selfstart"], new ComfyUISelfStartBackend.ComfyUISelfStartSettings() { StartScript = path, GPU_ID = $"{gpu}", ExtraArgs = extraArgs.Trim(), EnablePreviews = enablePreviews ? "true" : "false"});
     }
 
     /// <summary>Configure the backend during installation.</summary>
@@ -353,7 +353,7 @@ public class Installation
         await Models(models);
         StepsThusFar++;
         UpdateProgress(0, 0, 0);
-        await Program.Backends.ReloadAllBackends();
+        await BackendHandler.Instance.ReloadAllBackends();
         StepsThusFar++;
         UpdateProgress(0, 0, 0);
         await Output("Installed!");

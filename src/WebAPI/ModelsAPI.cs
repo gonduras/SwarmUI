@@ -44,7 +44,7 @@ public static class ModelsAPI
 
     public static Dictionary<string, JObject> InternalSwarmRemoteModels(string subtype)
     {
-        SwarmSwarmBackend[] backends = [.. Program.Backends.RunningBackendsOfType<SwarmSwarmBackend>().Where(b => b.RemoteModels is not null)];
+        SwarmSwarmBackend[] backends = [.. BackendHandler.Instance.RunningBackendsOfType<SwarmSwarmBackend>().Where(b => b.RemoteModels is not null)];
         IEnumerable<Dictionary<string, JObject>> sets = backends.Select(b => b.RemoteModels.GetValueOrDefault(subtype)).Where(b => b is not null);
         if (sets.IsEmpty())
         {
@@ -372,12 +372,12 @@ public static class ModelsAPI
             output(new JObject() { ["error"] = "Model not found." });
             return;
         }
-        using Session.GenClaim claim = session.Claim(0, Program.Backends.T2IBackends.Count, 0, 0);
+        using Session.GenClaim claim = session.Claim(0, BackendHandler.Instance.T2IBackends.Count, 0, 0);
         if (isWS)
         {
             output(BasicAPIFeatures.GetCurrentStatusRaw(session));
         }
-        if (!(await Program.Backends.LoadModelOnAll(actualModel, backendId is null ? null : (b => $"{b.ID}" == backendId))))
+        if (!(await BackendHandler.Instance.LoadModelOnAll(actualModel, backendId is null ? null : (b => $"{b.ID}" == backendId))))
         {
             Logs.Verbose("SelectModel refused due to LoadModel returning false");
             output(new JObject() { ["error"] = "Model failed to load." });
