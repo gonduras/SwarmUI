@@ -388,21 +388,31 @@ public class WebServer
     {
         path = path.Replace('\\', '/').Replace("%20", " ");
         path = Utilities.FilePathForbidden.TrimToNonMatches(path);
-        while (path.Contains(".."))
+
+        string combined = $"{root}/{path.Trim()}";
+
+        string fullRoot;
+        string fullPath;
+        try
         {
-            path = path.Replace("..", "");
+            fullRoot = Path.GetFullPath(root);
+            fullPath = Path.GetFullPath(combined);
         }
-        root = root.Replace('\\', '/');
-        path = $"{root}/{path.Trim()}";
-        while (path.Contains("//"))
+        catch (Exception ex)
         {
-            path = path.Replace("//", "/");
+            return (null, $"Refusing access, path resolution failed for '{path}' in root '{root}': {ex.Message}", "Unacceptable path.");
         }
-        if (!Directory.GetParent(path).FullName.Replace('\\', '/').StartsWith(root))
+
+        string rootWithSep = fullRoot.EndsWith(Path.DirectorySeparatorChar) ? fullRoot : fullRoot + Path.DirectorySeparatorChar;
+        string rootWithAltSep = fullRoot.EndsWith(Path.AltDirectorySeparatorChar) ? fullRoot : fullRoot + Path.AltDirectorySeparatorChar;
+
+        if (!(fullPath.StartsWith(rootWithSep) || fullPath.StartsWith(rootWithAltSep) || fullPath == fullRoot))
         {
-            return (null, $"Refusing dangerous access, got path '{path}' which resolves to '{Directory.GetParent(path)}' which does not obey expected root '{root}'",
+            return (null, $"Refusing dangerous access, got path '{path}' which resolves to '{fullPath}' which does not obey expected root '{fullRoot}'",
                 "Unacceptable path. If you are the server owner, check program console log.");
         }
+
+        path = fullPath.Replace('\\', '/');
         if (path.EndsWith('/'))
         {
             path = path[..^1];
