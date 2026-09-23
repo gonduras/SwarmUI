@@ -1,0 +1,121 @@
+11:43:11.461 [Init] === SwarmUI v0.9.7.1 Starting at 2026-09-05 11:43:11 ===
+11:43:11.548 [Init] Prepping extension: SwarmUI.Builtin_ScorersExtension.ScorersExtension...
+11:43:11.549 [Error] Could not determine path for extension 'ScorersExtension'. Searched in  for 'ScorersExtension.cs'
+11:43:11.549 [Error] This is labeled as an internal extension - if you're the developer, make sure you give it a unique namespace (do not use 'SwarmUI.')
+11:43:11.549 [Init] Prepping extension: SwarmUI.Builtin_ImageBatchToolExtension.ImageBatchToolExtension...
+11:43:11.550 [Error] Could not determine path for extension 'ImageBatchToolExtension'. Searched in  for 'ImageBatchToolExtension.cs'
+11:43:11.550 [Error] This is labeled as an internal extension - if you're the developer, make sure you give it a unique namespace (do not use 'SwarmUI.')
+11:43:11.550 [Init] Prepping extension: SwarmUI.Builtin_GridGeneratorExtension.GridGeneratorExtension...
+11:43:11.550 [Error] Could not determine path for extension 'GridGeneratorExtension'. Searched in  for 'GridGeneratorExtension.cs'
+11:43:11.550 [Error] This is labeled as an internal extension - if you're the developer, make sure you give it a unique namespace (do not use 'SwarmUI.')
+11:43:11.550 [Init] Prepping extension: SwarmUI.Builtin_DynamicThresholding.DynamicThresholdingExtension...
+11:43:11.550 [Error] Could not determine path for extension 'DynamicThresholdingExtension'. Searched in  for 'DynamicThresholdingExtension.cs'
+11:43:11.550 [Error] This is labeled as an internal extension - if you're the developer, make sure you give it a unique namespace (do not use 'SwarmUI.')
+11:43:11.550 [Init] Prepping extension: SwarmUI.Builtin_ComfyUIBackend.ComfyUIBackendExtension...
+11:43:11.551 [Error] Could not determine path for extension 'ComfyUIBackendExtension'. Searched in  for 'ComfyUIBackendExtension.cs'
+11:43:11.551 [Error] This is labeled as an internal extension - if you're the developer, make sure you give it a unique namespace (do not use 'SwarmUI.')
+11:43:11.551 [Init] Prepping extension: SwarmUI.Builtin_AutoWebUIExtension.AutoWebUIBackendExtension...
+11:43:11.551 [Error] Could not determine path for extension 'AutoWebUIBackendExtension'. Searched in  for 'AutoWebUIBackendExtension.cs'
+11:43:11.551 [Error] This is labeled as an internal extension - if you're the developer, make sure you give it a unique namespace (do not use 'SwarmUI.')
+11:43:11.608 [Init] Parsing command line...
+11:43:11.609 [Init] Loading settings file...
+11:43:11.669 [Init] Re-saving settings file...
+11:43:11.722 [Init] Applying command line settings...
+11:43:11.740 [Init] Swarm base path is: /app/src
+11:43:11.740 [Init] Running on OS: Ubuntu 24.04.4 LTS
+11:43:11.771 [Init] CPU Cores: 4 | RAM: 7.77 GiB total, 6.98 GiB available, unknown virtual/swap
+11:43:11.812 [Error] Failed to run event on extension SwarmUI.Builtin_ComfyUIBackend.ComfyUIBackendExtension: System.UnauthorizedAccessException: Access to the path '/CustomWorkflows' is denied.
+ ---> System.IO.IOException: Permission denied
+   --- End of inner exception stack trace ---
+   at System.IO.FileSystem.CreateDirectory(String fullPath, UnixFileMode unixCreateMode)
+   at System.IO.Directory.CreateDirectory(String path)
+   at SwarmUI.Builtin_ComfyUIBackend.ComfyUIBackendExtension.LoadWorkflowFiles() in /app/src/BuiltinExtensions/ComfyUIBackend/ComfyUIBackendExtension.cs:line 299
+   at SwarmUI.Builtin_ComfyUIBackend.ComfyUIBackendExtension.OnPreInit() in /app/src/BuiltinExtensions/ComfyUIBackend/ComfyUIBackendExtension.cs:line 78
+   at SwarmUI.Core.Program.<>c.<Main>b__28_7(Extension e) in /app/src/Core/Program.cs:line 286
+   at SwarmUI.Core.ExtensionsManager.RunOnAllExtensions(Action`1 action) in /app/src/Core/ExtensionsManager.cs:line 143
+11:43:11.812 [Init] Prepping options...
+11:43:12.094 [Init] Loading models list...
+11:43:12.122 [Init] Loading backends...
+11:43:12.124 [Init] Loading backends from file...
+11:43:12.127 [Init] Prepping API...
+11:43:12.129 [Init] Backend request handler loop ready...
+11:43:12.134 [Init] Prepping webserver...
+11:43:12.179 [Init] Current git commit is [ef85e3e: detect obscure old xl lora variant], marked as date 2025-11-04 10:17:25 (305 days ago)
+11:43:12.186 [Init] Swarm is up to date! You have version 0.9.7.1, and 0.9.7-Beta is the latest.
+11:43:13.190 [Init] Scan for web extensions...
+11:43:13.194 [Init] Readying extensions for launch...
+11:43:13.194 [Init] Launching server...
+11:43:13.197 [Init] Starting webserver on http://localhost:7801
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[35]
+      No XML encryptor configured. Key {66b07471-9cca-4126-a210-52c61f338147} may be persisted to storage in unencrypted form.
+11:43:13.473 [Init] SwarmUI v0.9.7.1 - Local is now running.
+11:43:13.975 [Init] Launch web browser to install page...
+(B)0[?1049h[1;24r[m[4l[?1h=[?1h=[39;49m[39;49m[37m[40m[1;1H                                                                                [2;1H                                                                                [3;1H                                                                                [4;1H                                                                                [5;1H                                                                                [6;1H                                                                                [7;1H                                                                                [8;1H                                                                                [9;1H                                                                                [10;1H                                                                                [11;1H                                                                                [12;1H                                                                                [13;1H                                                                                [14;1H                                                                                [15;1H                                                                                [16;1H                                                                                [17;1H                                                                                [18;1H                                                                                [19;1H                                                                                [20;1H                                                                                [21;1H                                                                                [22;1H                                                                                [23;1H                                                                                [24;1H                                                                                [1@[37m[40m [H[m[39;49m[37m[40m[39;49m[37m[40m                                                                                [2;1H                                                                                [3;1H                                                                                [4;1H                                                                                [5;1H                                                                                [6;1H                                                                                [7;1H                                                                                [8;1H                                                                                [9;1H                                                                                [10;1H                                                                                [11;1H                                                                                [12;1H                                                                                [13;1H                                                                                [14;1H                                                                                [15;1H                                                                                [16;1H                                                                                [17;1H                                                                                [18;1H                                                                                [19;1H                                                                                [20;1H                                                                                [21;1H                                                                                [22;1H                                                                                [23;1H                                                                                [24;1H                                                                                [1@ [H[39;49m[m[22d[93m[44mGetting http://localhost:7801/Install                                           [22;38H[39;49m[m[93m[44mLooking up localhost:7801            [22;26H[39;49m[m[93m[44mMaking HTTP connection to localhost:7801[39;49m[m[24d[24;1H[?1049l[?1l>fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.DirectoryNotFoundException: Could not find a part of the path '/app/src/Assets/grid_gen.css'.
+         at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+         at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+         at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+         at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+         at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+         at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+         at System.IO.File.ReadAllText(String path, Encoding encoding)
+         at SwarmUI.Core.WebServer.<>c__DisplayClass22_3.<GatherExtensionPageAdditions>b__2() in /app/src/Core/WebServer.cs:line 326
+         at SwarmUI.Core.WebServer.ViewExtensionScript(HttpContext context) in /app/src/Core/WebServer.cs:line 422
+         at SwarmUI.Core.WebServer.<>c.<<Prep>b__21_5>d.MoveNext() in /app/src/Core/WebServer.cs:line 282
+      --- End of stack trace from previous location ---
+         at SwarmUI.Core.WebServer.<>c.<<Prep>b__21_3>d.MoveNext() in /app/src/Core/WebServer.cs:line 266
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.Collections.Generic.KeyNotFoundException: The given key 'en' was not present in the dictionary.
+         at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+         at SwarmUI.Pages.Pages_Install.ExecuteAsync() in /app/src/Pages/Install.cshtml:line 28
+         at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderPageCoreAsync(IRazorPage page, ViewContext context)
+         at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderPageAsync(IRazorPage page, ViewContext context, Boolean invokeViewStarts)
+         at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderAsync(ViewContext context)
+         at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ViewContext viewContext, String contentType, Nullable`1 statusCode)
+         at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ViewContext viewContext, String contentType, Nullable`1 statusCode)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at SwarmUI.Core.WebServer.<>c.<<Prep>b__21_5>d.MoveNext() in /app/src/Core/WebServer.cs:line 282
+      --- End of stack trace from previous location ---
+         at SwarmUI.Core.WebServer.<>c.<<Prep>b__21_3>d.MoveNext() in /app/src/Core/WebServer.cs:line 266
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.IO.DirectoryNotFoundException: Could not find a part of the path '/app/src/Assets/grid_gen.css'.
+         at Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, String path, Boolean isDirError)
+         at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String path, OpenFlags flags, Int32 mode, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+         at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, UnixFileMode openPermissions, Int64& fileLength, UnixFileMode& filePermissions, Boolean failForSymlink, Boolean& wasSymlink, Func`4 createOpenException)
+         at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+         at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+         at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+         at System.IO.File.ReadAllText(String path, Encoding encoding)
+         at SwarmUI.Core.WebServer.<>c__DisplayClass22_3.<GatherExtensionPageAdditions>b__2() in /app/src/Core/WebServer.cs:line 326
+         at SwarmUI.Core.WebServer.ViewExtensionScript(HttpContext context) in /app/src/Core/WebServer.cs:line 422
+         at SwarmUI.Core.WebServer.<>c.<<Prep>b__21_5>d.MoveNext() in /app/src/Core/WebServer.cs:line 282
+      --- End of stack trace from previous location ---
+         at SwarmUI.Core.WebServer.<>c.<<Prep>b__21_3>d.MoveNext() in /app/src/Core/WebServer.cs:line 266
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+11:44:36.358 [Info] Shutting down...
+11:44:36.359 [Info] Backend request handler loop closing...
+11:44:36.375 [Info] Backend handler shutdown complete without saving.
+11:44:36.375 [Info] Will shut down session handler...
+11:44:36.381 [Info] Will save user data.
+11:44:36.383 [Info] Session handler is shut down.
+11:44:36.386 [Info] All core shutdowns complete.
+11:44:36.386 [Info] Process should end now.
