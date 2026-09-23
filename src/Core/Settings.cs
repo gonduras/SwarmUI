@@ -391,6 +391,72 @@ public class Settings : AutoConfiguration
             [ConfigComment("If enabled, shifting to next/previous image (eg with arrow keys) in history or batch view,\ncycles at the ends (jumps from the start to the end or vice versa).\nIf disabled, shifting will simply stop at the ends.\nIf 'only arrow keys', cycling happens when you press the arrow keys, but not other actions (eg deleting an image will not cycle).")]
             [ManualSettingsOptions(Vals = ["true", "false", "only_arrows"], ManualNames = ["Enabled", "Disabled", "Only Arrow Keys"])]
             public string ImageShiftingCycles = "true";
+
+
+            public class ThemesImpl : SettingsOptionsAttribute.AbstractImpl
+            {
+                public override string[] GetOptions => [.. Program.Web.RegisteredThemes.Keys];
+
+                public override string[] Names => [.. Program.Web.RegisteredThemes.Values.Select(v => v.Name)];
+            }
+
+            [ConfigComment("What theme to use. Default is 'modern_dark'.")]
+            [SettingsOptions(Impl = typeof(ThemesImpl))]
+            public string Theme = "modern_dark";
+
+            [ConfigComment("If true, images in the main center area will always grow to better fill the screen.")]
+            public bool CenterImageAlwaysGrow = false;
+
+            [ConfigComment("If true, when 'Auto Swap To Images' is enabled, and you have FullView open, the FullView will also be swapped.\nIf false, the FullView will not change.")]
+            public bool AutoSwapImagesIncludesFullView = false;
+
+            [ConfigComment("A list of what buttons to include directly under images in the main prompt area of the Generate tab.\nOther buttons will be moved into the 'More' dropdown.\nThis should be a comma separated list."
+            + "\nThe following options are available: \"Use As Init\", \"Use As Image Prompt\", \"Edit Image\", \"Upscale 2x\", \"Star\", \"Reuse Parameters\", \"Open In Folder\", \"Delete\", \"Download\" \"View In History\", \"Refine Image\""
+            + "\nThe default is blank, which currently implies 'Use As Init,Edit Image,Star,Reuse Parameters'")]
+            public string ButtonsUnderMainImages = "";
+
+            [ConfigComment("How to format image metadata on the Generate tab when looking at an image.\n'below' means put the metadata below the image.\n'side' means put the image in a vertical column to the side.\n'auto' means switch to whichever fits better depending on the page width.\nDefault is 'auto'.")]
+            [ManualSettingsOptions(Vals = ["auto", "below", "side"])]
+            public string ImageMetadataFormat = "auto";
+
+            [ConfigComment("If enabled, batch size will be reset to 1 when parameters are loaded.\nThis can prevent accidents that might thrash your GPU or cause compatibility issues, especially for example when importing a comfy workflow.\nYou can still set the batch size at will in the GUI.")]
+            public bool ResetBatchSizeToOne = false;
+
+            public enum HintFormatOptions
+            {
+                BUTTON, HOVER, HOVER_DELAY, NONE
+            }
+
+            [ConfigComment("The format for parameter hints to display as.\nDefault is 'BUTTON'.")]
+            [SettingsOptions(Impl = typeof(SettingsOptionsAttribute.ForEnum<HintFormatOptions>))]
+            public string HintFormat = "BUTTON";
+
+            [ConfigComment("The delay, in seconds, for parameter hints when 'HOVER_DELAY' is selected.")]
+            public float HoverDelaySeconds = 0.5f;
+
+            [ConfigComment("How many lines of text to display in the standard prompt box before cutting off to a scroll bar.\nActual size in practice tends to be a few lines shorter due to browser and font variations.\nDefault is 10.")]
+            public int MaxPromptLines = 10;
+
+            [ConfigComment("If true, hitting enter while in the prompt box starts generation.\nIf false, hitting enter will insert a newline.")]
+            public bool EnterKeyGenerates = true;
+
+            [ConfigComment("Delay, in seconds, between Generate Forever updates.\nIf the delay hits and a generation is still waiting, it will be skipped.\nDefault is 0.1 seconds.")]
+            public double GenerateForeverDelay = 0.1;
+
+            [ConfigComment("Number of generations that Generate Forever should always keep queued up when enabled.\nUseful when using multiple backends to keep them all busy.")]
+            public int GenerateForeverQueueSize = 1;
+
+            [ConfigComment("How long to remember your last parameters for, in hours, inside browser cookies.\nDefault is 6 hours (long enough that you can close+reopen and get same params, but short enough that if you close for the day and come back you get a fresh UI).")]
+            public double ParameterMemoryDurationHours = 6;
+
+            public class LanguagesImpl : SettingsOptionsAttribute.AbstractImpl
+            {
+                public override string[] GetOptions => LanguagesHelper.SortedList;
+            }
+
+            [ConfigComment("What language to display the UI in.\nDefault is 'en' (English).")]
+            [SettingsOptions(Impl = typeof(LanguagesImpl))]
+            public string Language = "en";
         }
 
         [ConfigComment("Settings related to the user interface, entirely contained to the frontend.")]
@@ -414,50 +480,6 @@ public class Settings : AutoConfiguration
         [ConfigComment("List of role IDs applied to this user. Defaults to owner (for local/accountless usage).")]
         [ValueIsRestricted]
         public List<string> Roles = ["owner"];
-
-        public class ThemesImpl : SettingsOptionsAttribute.AbstractImpl
-        {
-            public override string[] GetOptions => [.. Program.Web.RegisteredThemes.Keys];
-
-            public override string[] Names => [.. Program.Web.RegisteredThemes.Values.Select(v => v.Name)];
-        }
-
-        [ConfigComment("What theme to use. Default is 'modern_dark'.")]
-        [SettingsOptions(Impl = typeof(ThemesImpl))]
-        public string Theme = "modern_dark"; // TODO: UserUI
-
-        [ConfigComment("If true, images in the main center area will always grow to better fill the screen.")]
-        public bool CenterImageAlwaysGrow = false; // TODO: UserUI
-
-        [ConfigComment("If true, when 'Auto Swap To Images' is enabled, and you have FullView open, the FullView will also be swapped.\nIf false, the FullView will not change.")]
-        public bool AutoSwapImagesIncludesFullView = false; // TODO: UserUI
-
-        [ConfigComment("A list of what buttons to include directly under images in the main prompt area of the Generate tab.\nOther buttons will be moved into the 'More' dropdown.\nThis should be a comma separated list."
-            + "\nThe following options are available: \"Use As Init\", \"Use As Image Prompt\", \"Edit Image\", \"Upscale 2x\", \"Star\", \"Reuse Parameters\", \"Open In Folder\", \"Delete\", \"Download\" \"View In History\", \"Refine Image\""
-            + "\nThe default is blank, which currently implies 'Use As Init,Edit Image,Star,Reuse Parameters'")]
-        public string ButtonsUnderMainImages = ""; // TODO: UserUI
-
-        [ConfigComment("How to format image metadata on the Generate tab when looking at an image.\n'below' means put the metadata below the image.\n'side' means put the image in a vertical column to the side.\n'auto' means switch to whichever fits better depending on the page width.\nDefault is 'auto'.")]
-        [ManualSettingsOptions(Vals = ["auto", "below", "side"])]
-        public string ImageMetadataFormat = "auto";
-
-        [ConfigComment("If enabled, batch size will be reset to 1 when parameters are loaded.\nThis can prevent accidents that might thrash your GPU or cause compatibility issues, especially for example when importing a comfy workflow.\nYou can still set the batch size at will in the GUI.")]
-        public bool ResetBatchSizeToOne = false;
-
-        public enum HintFormatOptions
-        {
-            BUTTON, HOVER, HOVER_DELAY, NONE
-        }
-
-        [ConfigComment("The format for parameter hints to display as.\nDefault is 'BUTTON'.")]
-        [SettingsOptions(Impl = typeof(SettingsOptionsAttribute.ForEnum<HintFormatOptions>))]
-        public string HintFormat = "BUTTON"; // TODO: UserUI
-
-        [ConfigComment("The delay, in seconds, for parameter hints when 'HOVER_DELAY' is selected.")]
-        public float HoverDelaySeconds = 0.5f; // TODO: UserUI
-
-        [ConfigComment("How many lines of text to display in the standard prompt box before cutting off to a scroll bar.\nActual size in practice tends to be a few lines shorter due to browser and font variations.\nDefault is 10.")]
-        public int MaxPromptLines = 10; // TODO: UserUI
 
         public class VAEsData : AutoConfiguration
         {
@@ -503,27 +525,6 @@ public class Settings : AutoConfiguration
 
         [ConfigComment("When generating live previews (ie the turbo preview system, not normal generation previews after you've hit the Generate button),\nthis is how many simultaneous generation requests can be waiting at one time.")]
         public int MaxSimulPreviews = 1;
-
-        [ConfigComment("If true, hitting enter while in the prompt box starts generation.\nIf false, hitting enter will insert a newline.")]
-        public bool EnterKeyGenerates = true; // TODO: UserUI
-
-        [ConfigComment("Delay, in seconds, between Generate Forever updates.\nIf the delay hits and a generation is still waiting, it will be skipped.\nDefault is 0.1 seconds.")]
-        public double GenerateForeverDelay = 0.1;
-
-        [ConfigComment("Number of generations that Generate Forever should always keep queued up when enabled.\nUseful when using multiple backends to keep them all busy.")]
-        public int GenerateForeverQueueSize = 1;
-
-        [ConfigComment("How long to remember your last parameters for, in hours, inside browser cookies.\nDefault is 6 hours (long enough that you can close+reopen and get same params, but short enough that if you close for the day and come back you get a fresh UI).")]
-        public double ParameterMemoryDurationHours = 6; // TODO: UserUI
-
-        public class LanguagesImpl : SettingsOptionsAttribute.AbstractImpl
-        {
-            public override string[] GetOptions => LanguagesHelper.SortedList;
-        }
-
-        [ConfigComment("What language to display the UI in.\nDefault is 'en' (English).")]
-        [SettingsOptions(Impl = typeof(LanguagesImpl))]
-        public string Language = "en"; // TODO: UserUI
 
         [ConfigComment("Comma-separated list of parameters to exclude from 'Reuse Parameters'.\nFor example, set 'model' to not copy the model, or 'model,refinermodel,videomodel' to really never copy any models.")]
         public string ReuseParamExcludeList = "wildcardseed";
