@@ -180,7 +180,7 @@ public class GridGeneratorExtension : Extension
             }
             int iteration = runner.Iteration;
             Task t = Task.Run(() => T2IEngine.CreateImageTask(thisParams, $"{iteration}", data.Claim, data.AddOutput, setError, true, Program.ServerSettings.Backends.PerRequestTimeoutMinutes,
-                (image, metadata) =>
+                async (image, metadata) =>
                 {
                     Logs.Info($"Completed gen #{iteration} (of {runner.TotalRun}) ... Set: '{set.Data}', file '{set.BaseFilepath}'");
                     string mainpath = $"{set.Grid.Runner.BasePath}/{set.BaseFilepath}";

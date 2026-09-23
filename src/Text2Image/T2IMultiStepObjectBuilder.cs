@@ -22,7 +22,7 @@ public class T2IMultiStepObjectBuilder
         async Task<MediaFile> createImageDirect(T2IParamInput user_input)
         {
             MediaFile result = null;
-            await T2IEngine.CreateImageTask(user_input, batchId + (obj++), claim, output, setError, isWS, backendTimeoutMin, (img, meta) => { result = img.File; }, false);
+            await T2IEngine.CreateImageTask(user_input, batchId + (obj++), claim, output, setError, isWS, backendTimeoutMin, async (img, meta) => { result = img.File; }, false);
             return result;
         }
         if (string.IsNullOrWhiteSpace(prompt) || !prompt.Contains("<object:"))

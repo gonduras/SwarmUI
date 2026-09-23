@@ -292,7 +292,7 @@ public static class T2IAPI
         int max_degrees = session.User.CalcMaxT2ISimultaneous;
         List<int> discard = [];
         int batchSizeExpected = user_input.Get(T2IParamTypes.BatchSize, 1);
-        void saveImage(T2IEngine.ImageOutput image, int actualIndex, T2IParamInput thisParams, string metadata)
+        async Task saveImage(T2IEngine.ImageOutput image, int actualIndex, T2IParamInput thisParams, string metadata)
         {
             Logs.Verbose($"T2IAPI received save request for index {actualIndex} for gen request id {thisParams.UserRequestId}, isreal={image.IsReal}");
             bool noSave = thisParams.Get(T2IParamTypes.DoNotSave, false);
@@ -306,7 +306,7 @@ public static class T2IAPI
                 MediaFile file = image.File;
                 if (session.User.Settings.FileFormat.ReformatTransientImages && image.ActualFileTask is not null)
                 {
-                    file = image.ActualFileTask.Result;
+                    file = await image.ActualFileTask;
                 }
                 (url, filePath) = (file.AsDataString(), null);
             }
@@ -366,7 +366,7 @@ public static class T2IAPI
             }
             int numCalls = 0;
             tasks.Add(Task.Run(() => T2IEngine.CreateImageTask(thisParams, $"{imageIndex}", claim, output, setError, isWS, Program.ServerSettings.Backends.PerRequestTimeoutMinutes,
-                (image, metadata) =>
+                async (image, metadata) =>
                 {
                     int actualIndex = imageIndex + numCalls;
                     if (image.IsReal)
@@ -381,7 +381,7 @@ public static class T2IAPI
                     {
                         actualIndex = -10 - Interlocked.Increment(ref data.NumNonReal);
                     }
-                    saveImage(image, actualIndex, thisParams, metadata);
+                    await saveImage(image, actualIndex, thisParams, metadata);
                 })));
             if (Program.Backends.QueuedRequests < Program.ServerSettings.Backends.MaxRequestsForcedOrder)
             {
@@ -426,7 +426,7 @@ public static class T2IAPI
             user_input.ExtraMeta["generation_time"] = $"{genTime / 1000.0:0.00} total seconds (average {(finalTime - timeStart) / griddables.Length / 1000.0:0.00} seconds per image)";
             (Task<MediaFile> gridFileTask, string metadata) = user_input.SourceSession.ApplyMetadata(gridImg, user_input, imgs.Length);
             T2IEngine.ImageOutput gridOutput = new() { File = gridImg, ActualFileTask = gridFileTask, GenTimeMS = genTime };
-            saveImage(gridOutput, -1, user_input, metadata);
+            await saveImage(gridOutput, -1, user_input, metadata);
         }
         T2IEngine.PostBatchEvent?.Invoke(new(user_input, [.. griddables]));
         output(new JObject() { ["discard_indices"] = JToken.FromObject(discard) });
