@@ -606,10 +606,18 @@ public class BackendHandler
             try
             {
                 bool any = false;
+                List<Task<bool>> initTasks = new();
                 while (BackendsToInit.TryDequeue(out T2IBackendData data) && !HasShutdown)
                 {
-                    bool loaded = LoadBackendDirect(data).Result;
-                    any = any || loaded;
+                    initTasks.Add(LoadBackendDirect(data));
+                }
+                if (initTasks.Count > 0)
+                {
+                    bool[] results = Task.WhenAll(initTasks).Result;
+                    foreach (bool loaded in results)
+                    {
+                        any = any || loaded;
+                    }
                 }
                 if (any)
                 {
