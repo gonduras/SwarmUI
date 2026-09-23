@@ -19,13 +19,15 @@ namespace SwarmUI.Builtin_ComfyUIBackend;
 /// <summary>Helper class for network redirections for the '/ComfyBackendDirect' url path.</summary>
 public class ComfyUIRedirectHelper
 {
-    // TODO: Should have an identity attached in a cookie so we can backtrack to the original user.
-    /// <summary>A known ComfyUI page viewer. Uniquely identified by temporary SIDs, not actual underlying user.</summary>
+    // Identity is now attached in a cookie to backtrack to the original user.
+    /// <summary>A known ComfyUI page viewer. Identified by temporary SIDs and mapped to an underlying Swarm user.</summary>
     public class ComfyUser
     {
         public ConcurrentDictionary<ComfyClientData, ComfyClientData> Clients = new();
 
         public string MasterSID;
+
+        public string UserID;
 
         public int TotalQueue => Clients.Values.Sum(c => c.QueueRemaining);
 
@@ -181,6 +183,7 @@ public class ComfyUIRedirectHelper
             await context.Response.CompleteAsync();
             return;
         }
+        context.Response.Cookies.Append("comfy_swarm_user_id", swarmUser.UserID, new CookieOptions() { HttpOnly = false, SameSite = SameSiteMode.Strict, Expires = DateTimeOffset.UtcNow.AddDays(30) });
         List<ComfyUIBackendExtension.ComfyBackendData> allBackends = [.. ComfyUIBackendExtension.ComfyBackendsDirect()];
         if (context.Request.Headers.TryGetValue("X-Swarm-Backend-ID", out StringValues backendId) && int.TryParse(backendId, out int backendIdInt))
         {
@@ -216,7 +219,7 @@ public class ComfyUIRedirectHelper
             Logs.Debug($"Comfy backend direct websocket request to {path}, have {allBackends.Count} backends available");
             WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
             List<Task> tasks = [];
-            ComfyUser user = new() { Socket = socket };
+            ComfyUser user = new() { Socket = socket, UserID = swarmUser.UserID };
             // Order all evens then all odds - eg 0, 2, 4, 6, 1, 3, 5, 7 (to reduce chance of overlap when sharing)
             int[] vals = [.. Enumerable.Range(0, allBackends.Count)];
             vals = [.. vals.Where(v => v % 2 == 0), .. vals.Where(v => v % 2 == 1)];
