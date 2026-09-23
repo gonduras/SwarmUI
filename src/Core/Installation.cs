@@ -33,10 +33,10 @@ public class Installation
     }
 
     /// <summary>Send a progress update for the installation down the websocket.</summary>
-    public static void UpdateProgress(long progress, long total, long perSec)
+    public static async Task UpdateProgress(long progress, long total, long perSec)
     {
         // TODO: better way to send these out without waiting
-        InstallSocket.SendJson(new JObject() { ["progress"] = progress, ["total"] = total, ["steps"] = StepsThusFar, ["total_steps"] = TotalSteps, ["per_second"] = perSec }, API.WebsocketTimeout).Wait();
+        await InstallSocket.SendJson(new JObject() { ["progress"] = progress, ["total"] = total, ["steps"] = StepsThusFar, ["total_steps"] = TotalSteps, ["per_second"] = perSec }, API.WebsocketTimeout);
     }
 
     /// <summary>Configure the theme during installation.</summary>
@@ -105,7 +105,7 @@ public class Installation
             await Utilities.DownloadFile("https://github.com/comfyanonymous/ComfyUI/releases/download/latest/ComfyUI_windows_portable_nvidia_or_cpu_nightly_pytorch.7z", "dlbackend/comfyui_dl.7z", UpdateProgress);
         }
         StepsThusFar++;
-        UpdateProgress(0, 0, 0);
+        await UpdateProgress(0, 0, 0);
         await Output("Downloaded! Extracting... (look in terminal window for details)");
         Directory.CreateDirectory("dlbackend/tmpcomfy/");
         await Process.Start("launchtools/7z/win/7za.exe", $"x dlbackend/comfyui_dl.7z -o\"dlbackend/tmpcomfy/\" -y").WaitForExitAsync(Program.GlobalProgramCancel);
@@ -144,7 +144,7 @@ public class Installation
         try
         {
             await Utilities.DownloadFile("https://aka.ms/vs/16/release/vc_redist.x64.exe", "dlbackend/vc_redist.x64.exe", UpdateProgress);
-            UpdateProgress(0, 0, 0);
+            await UpdateProgress(0, 0, 0);
             await Process.Start(new ProcessStartInfo(Path.GetFullPath("dlbackend/vc_redist.x64.exe"), "/quiet /install /passive /norestart") { UseShellExecute = true }).WaitForExitAsync(Program.GlobalProgramCancel);
         }
         catch (Exception ex)
@@ -198,7 +198,7 @@ public class Installation
         else
         {
             StepsThusFar++;
-            UpdateProgress(0, 0, 0);
+            await UpdateProgress(0, 0, 0);
             string gpuType = install_amd ? "amd" : "nv";
             Logs.LogLevel level = Logs.MinimumLevel;
             Logs.MinimumLevel = Logs.LogLevel.Verbose;
@@ -282,7 +282,7 @@ public class Installation
                 await Output($"Failed to download '{modelInfo.URL}' (HTTP): {ex.GetType().Name}: {ex.Message}");
             }
             StepsThusFar++;
-            UpdateProgress(0, 0, 0);
+            await UpdateProgress(0, 0, 0);
             await Output("Model download complete.");
         }
         Program.MainSDModels.Refresh();
@@ -343,7 +343,7 @@ public class Installation
             TotalSteps += models.Split(',').Length;
         }
         StepsThusFar++;
-        UpdateProgress(0, 0, 0);
+        await UpdateProgress(0, 0, 0);
         await Backend(backend, install_amd);
         if (make_shortcut)
         {
@@ -352,10 +352,10 @@ public class Installation
         SettingsApply();
         await Models(models);
         StepsThusFar++;
-        UpdateProgress(0, 0, 0);
+        await UpdateProgress(0, 0, 0);
         await Program.Backends.ReloadAllBackends();
         StepsThusFar++;
-        UpdateProgress(0, 0, 0);
+        await UpdateProgress(0, 0, 0);
         await Output("Installed!");
         await socket.SendJson(new JObject() { ["success"] = true }, API.WebsocketTimeout);
     }

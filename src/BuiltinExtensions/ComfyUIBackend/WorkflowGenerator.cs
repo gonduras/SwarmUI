@@ -408,7 +408,7 @@ public class WorkflowGenerator
                 {
                     File.Delete(tmpPath);
                 }
-                Utilities.DownloadFile(url, tmpPath, (bytes, total, perSec) =>
+                Utilities.DownloadFile(url, tmpPath, async (bytes, total, perSec) =>
                 {
                     double perc = bytes / (double)total;
                     if (perc >= nextPerc)
@@ -417,6 +417,7 @@ public class WorkflowGenerator
                         // TODO: Send a signal back so a progress bar can be displayed on a UI
                         nextPerc = Math.Round(perc / 0.05) * 0.05 + 0.05;
                     }
+                    await Task.Yield();
                 }, verifyHash: hash).Wait();
                 File.Move(tmpPath, filePath);
             }
