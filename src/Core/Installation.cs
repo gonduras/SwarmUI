@@ -64,7 +64,7 @@ public class Installation
                 Program.ServerSettings.Network.Host = "localhost";
                 Program.ServerSettings.Network.Port = 7801;
                 Program.ServerSettings.Network.PortCanChange = true;
-                Program.ServerSettings.LaunchMode = "web"; // TODO: Electron?
+                Program.ServerSettings.LaunchMode = "web";
                 break;
             case "just_self_lan":
                 await Output("Configuring settings as 'just yourself (LAN)' install.");
