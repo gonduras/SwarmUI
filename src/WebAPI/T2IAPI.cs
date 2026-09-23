@@ -505,40 +505,8 @@ public static class T2IAPI
         {
             ConcurrentDictionary<string, string> dirsConc = [];
             ConcurrentDictionary<string, string> finalDirs = [];
-            ConcurrentDictionary<string, Task> tasks = [];
-            void addDirs(string dir, int subDepth)
-            {
-                tasks.TryAdd(dir, Utilities.RunCheckedTask(() =>
-                {
-                    if (dir.EndsWith('/'))
-                    {
-                        dir = dir[..^1];
-                    }
-                    if (dir != "")
-                    {
-                        (subDepth == 0 ? finalDirs : dirsConc).TryAdd(dir, dir);
-                    }
-                    if (subDepth > 0)
-                    {
-                        string actualPath = $"{path}/{dir}";
-                        actualPath = UserImageHistoryHelper.GetRealPathFor(session.User, actualPath, root: root);
-                        if (!Directory.Exists(actualPath))
-                        {
-                            return;
-                        }
-                        IEnumerable<string> subDirs = Directory.EnumerateDirectories(actualPath).Select(Path.GetFileName).OrderDescending();
-                        foreach (string subDir in subDirs)
-                        {
-                            string subPath = dir == "" ? subDir : $"{dir}/{subDir}";
-                            if (isAllowed(subPath))
-                            {
-                                addDirs(subPath, subDepth - 1);
-                            }
-                        }
-                    }
-                }, "t2i getlist add dir"));
-            }
-            addDirs("", depth);
+            int currentDepth = depth;
+            List<string> currentLevel = [""];
             string rawRefPath = Path.GetRelativePath(root, path).Replace('\\', '/');
             if (!rawRefPath.EndsWith('/'))
             {
@@ -552,13 +520,53 @@ public static class T2IAPI
             {
                 if (specialFolder.StartsWith(rawRefPath))
                 {
-                    addDirs(specialFolder[rawRefPath.Length..], 1);
+                    currentLevel.Add(specialFolder[rawRefPath.Length..]);
                 }
             }
-            while (tasks.Any(t => !t.Value.IsCompleted))
+
+            while (currentDepth > 0 && currentLevel.Count > 0)
             {
-                Task.WaitAll([.. tasks.Values]);
+                ConcurrentBag<string> nextLevel = [];
+                Parallel.ForEach(currentLevel, dir =>
+                {
+                    if (dir.EndsWith('/'))
+                    {
+                        dir = dir[..^1];
+                    }
+                    if (dir != "")
+                    {
+                        dirsConc.TryAdd(dir, dir);
+                    }
+                    string actualPath = $"{path}/{dir}";
+                    actualPath = UserImageHistoryHelper.GetRealPathFor(session.User, actualPath, root: root);
+                    if (Directory.Exists(actualPath))
+                    {
+                        foreach (string subPathFull in Directory.EnumerateDirectories(actualPath))
+                        {
+                            string subDir = Path.GetFileName(subPathFull);
+                            string subPath = dir == "" ? subDir : $"{dir}/{subDir}";
+                            if (isAllowed(subPath))
+                            {
+                                nextLevel.Add(subPath);
+                            }
+                        }
+                    }
+                });
+                currentLevel = [.. nextLevel];
+                currentDepth--;
             }
+
+            Parallel.ForEach(currentLevel, dir =>
+            {
+                if (dir.EndsWith('/'))
+                {
+                    dir = dir[..^1];
+                }
+                if (dir != "")
+                {
+                    finalDirs.TryAdd(dir, dir);
+                }
+            });
             List<string> dirs = [.. dirsConc.Keys.OrderDescending()];
             if (sortReverse)
             {
