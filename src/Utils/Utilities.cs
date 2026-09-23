@@ -692,7 +692,7 @@ public static class Utilities
     public static HttpClient DownloaderWebClient = NetworkBackendUtils.MakeHttpClient(120);
 
     /// <summary>Downloads a file from a given URL and saves it to a given filepath.</summary>
-    public static async Task DownloadFile(string url, string filepath, Action<long, long, long> progressUpdate, CancellationTokenSource cancel = null, string altUrl = null, string verifyHash = null, Dictionary<string, string> headers = null)
+    public static async Task DownloadFile(string url, string filepath, Func<long, long, long, Task> progressUpdate, CancellationTokenSource cancel = null, string altUrl = null, string verifyHash = null, Dictionary<string, string> headers = null)
     {
         altUrl ??= url;
         cancel ??= new();
@@ -892,12 +892,12 @@ public static class Utilities
                 {
                     return;
                 }
-                progressUpdate(0, length, 0);
+                await progressUpdate(0, length, 0);
                 while (true)
                 {
                     if (progUpdates.TryDequeue(out (long, long, long, bool) update))
                     {
-                        progressUpdate(update.Item1, update.Item2, update.Item3);
+                        await progressUpdate(update.Item1, update.Item2, update.Item3);
                         if (update.Item4)
                         {
                             break;

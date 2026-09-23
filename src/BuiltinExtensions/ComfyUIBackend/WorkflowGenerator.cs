@@ -408,7 +408,7 @@ public class WorkflowGenerator
                 {
                     File.Delete(tmpPath);
                 }
-                Utilities.DownloadFile(url, tmpPath, (bytes, total, perSec) =>
+                Utilities.DownloadFile(url, tmpPath, async (bytes, total, perSec) =>
                 {
                     double perc = bytes / (double)total;
                     if (perc >= nextPerc)

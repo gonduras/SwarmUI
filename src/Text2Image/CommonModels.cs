@@ -19,7 +19,7 @@ public static class CommonModels
     public record class ModelInfo(string ID, string DisplayName, string Description, string URL, string Hash, string FolderType, string FileName)
     {
         /// <summary>Trigger a download of this model.</summary>
-        public async Task DownloadNow(Action<long, long, long> updateProgress = null)
+        public async Task DownloadNow(Func<long, long, long, Task> updateProgress = null)
         {
             string folder = Program.T2IModelSets[FolderType].FolderPaths[0];
             string path = $"{folder}/{FileName}";
