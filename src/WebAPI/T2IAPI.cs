@@ -686,27 +686,34 @@ public static class T2IAPI
             return new JObject() { ["error"] = userError };
         }
         path = UserImageHistoryHelper.GetRealPathFor(session.User, path, root: root);
-        if (!File.Exists(path))
+        string fullPath = Path.GetFullPath(path);
+        string fullRoot = Path.GetFullPath(root);
+        if (!fullPath.StartsWith(fullRoot + Path.DirectorySeparatorChar) && fullPath != fullRoot)
         {
-            Logs.Warning($"User {session.User.UserID} tried to open image path '{origPath}' which maps to '{path}', but cannot as the image does not exist.");
+            Logs.Warning($"User {session.User.UserID} tried to open image path outside root '{fullPath}'.");
+            return new JObject() { ["error"] = "Invalid path." };
+        }
+        if (!File.Exists(fullPath))
+        {
+            Logs.Warning($"User {session.User.UserID} tried to open image path '{origPath}' which maps to '{fullPath}', but cannot as the image does not exist.");
             return new JObject() { ["error"] = "That file does not exist, cannot open." };
         }
         ProcessStartInfo psi = new();
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             psi.FileName = "explorer.exe";
-            psi.ArgumentList.Add($"/select,{Path.GetFullPath(path)}");
+            psi.ArgumentList.Add($"/select,{fullPath}");
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             psi.FileName = "xdg-open";
-            psi.ArgumentList.Add(Path.GetDirectoryName(Path.GetFullPath(path)));
+            psi.ArgumentList.Add(Path.GetDirectoryName(fullPath));
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             psi.FileName = "open";
             psi.ArgumentList.Add("-R");
-            psi.ArgumentList.Add(Path.GetFullPath(path));
+            psi.ArgumentList.Add(fullPath);
         }
         else
         {
