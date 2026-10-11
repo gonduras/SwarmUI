@@ -195,8 +195,8 @@ public class API
         }
     }
 
-    /// <summary>Placeholder default WebSocket timeout.</summary>
-    public static TimeSpan WebsocketTimeout = TimeSpan.FromMinutes(2); // TODO: Configurable timeout
+    /// <summary>Configured default timeout for a websocket.</summary>
+    public static TimeSpan WebsocketTimeout => TimeSpan.FromMinutes(Program.ServerSettings.Network.WebsocketTimeoutMinutes);
 
     /// <summary>Helper to run simple websocket-multiresult action API calls.</summary>
     public static async Task RunWebsocketHandlerCallWS<T>(Func<Session, T, Action<JObject>, bool, Task> handler, Session session, T val, WebSocket socket)
