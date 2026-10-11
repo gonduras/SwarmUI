@@ -233,6 +233,12 @@ public class Settings : AutoConfiguration
 
         [ConfigComment("How many entries in an X-Forwarded-For header to trust.\nDefaults to 3.\nSet to 0 to not trust any forwarded-for.")]
         public int MaxXForwardedFor = 3;
+
+        [ConfigComment("Maximum size in megabytes of an API JSON request when the user is not authenticated.\nDefaults to 10 MB.\nDoes not affect file uploads (those are configured separately).")]
+        public int UnauthenticatedMaxJsonMegabytes = 10;
+
+        [ConfigComment("Maximum size in megabytes of an API JSON request when the user is authenticated.\nDefaults to 100 MB.\nDoes not affect file uploads (those are configured separately).")]
+        public int AuthenticatedMaxJsonMegabytes = 100;
     }
 
     /// <summary>Settings related to file paths.</summary>
