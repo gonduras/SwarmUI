@@ -663,108 +663,8 @@ function getImageFullSrc(src) {
     return fullSrc;
 }
 
-function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, smoothAdd = false, canReparse = true, isPlaceholder = false) {
-    currentImgSrc = src;
-    if (metadata) {
-        metadata = interpretMetadata(metadata);
-    }
-    currentMetadataVal = metadata;
-    let isVideo = isVideoExt(src);
-    let isAudio = isAudioExt(src);
-    if ((smoothAdd || !metadata) && canReparse && !isVideo && !isAudio) {
-        let image = new Image();
-        image.onload = () => {
-            if (!metadata) {
-                parseMetadata(image, (data, parsedMetadata) => {
-                    setCurrentImage(src, parsedMetadata, batchId, previewGrow, false, false);
-                });
-            }
-            else {
-                setCurrentImage(src, metadata, batchId, previewGrow, false, false);
-            }
-        };
-        image.src = src;
-        return;
-    }
-    let curImg = getRequiredElementById('current_image');
-    if (isPlaceholder) {
-        curImg.classList.add('current_image_placeholder');
-    }
-    else {
-        curImg.classList.remove('current_image_placeholder');
-    }
-    let img;
-    let isReuse = false;
-    let srcTarget;
-    if (isVideo) {
-        curImg.innerHTML = '';
-        img = document.createElement('video');
-        img.loop = true;
-        img.autoplay = true;
-        img.controls = true;
-        let sourceObj = document.createElement('source');
-        srcTarget = sourceObj;
-        sourceObj.type = isVideo;
-        img.appendChild(sourceObj);
-    }
-    else if (isAudio) {
-        curImg.innerHTML = '';
-        img = document.createElement('audio');
-        img.controls = true;
-        srcTarget = img;
-    }
-    else {
-        img = document.getElementById('current_image_img');
-        if (!img || img.tagName != 'IMG') {
-            curImg.innerHTML = '';
-            img = document.createElement('img');
-        }
-        else {
-            isReuse = true;
-            delete img.dataset.previewGrow;
-            img.removeAttribute('width');
-            img.removeAttribute('height');
-        }
-        srcTarget = img;
-    }
-    function naturalDim() {
-        if (isVideo) {
-            return [img.videoWidth, img.videoHeight];
-        }
-        else if (isAudio) {
-            return [200, 50];
-        }
-        else {
-            return [img.naturalWidth, img.naturalHeight];
-        }
-    }
-    img.onload = () => {
-        let [width, height] = naturalDim();
-        if (previewGrow || getUserSetting('centerimagealwaysgrow')) {
-            img.width = width * 8;
-            img.height = height * 8;
-            img.dataset.previewGrow = 'true';
-        }
-        alignImageDataFormat();
-    }
-    if (isVideo || isAudio) {
-        img.addEventListener('loadeddata', function() {
-            if (img) {
-                img.onload();
-            }
-        }, false);
-    }
-    srcTarget.src = src;
-    img.className = 'current-image-img';
-    img.id = 'current_image_img';
-    img.dataset.src = src;
-    img.dataset.metadata = metadata || '{}';
-    img.dataset.batch_id = batchId;
-    img.onclick = () => imageFullView.showImage(img.dataset.src, img.dataset.metadata, img.dataset.batch_id);
-    let extrasWrapper = isReuse ? document.getElementById('current-image-extras-wrapper') : createDiv('current-image-extras-wrapper', 'current-image-extras-wrapper');
-    extrasWrapper.innerHTML = '';
+function buildCurrentImageButtons(img, src, imagePathClean, metadata, isDataImage, naturalDim) {
     let buttons = createDiv(null, 'current-image-buttons');
-    let imagePathClean = getImageFullSrc(src);
     let buttonsChoice = getUserSetting('ButtonsUnderMainImages', '');
     if (buttonsChoice == '')
     {
@@ -784,7 +684,6 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
             subButtons.push({ key: name, action: action, title: title });
         }
     }
-    let isDataImage = src.startsWith('data:');
     includeButton('Use As Init', () => {
         let initImageParam = document.getElementById('input_initimage');
         if (initImageParam) {
@@ -954,6 +853,112 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
         let rect = button.getBoundingClientRect();
         new AdvancedPopover('image_more_popover', subButtons, false, rect.x, rect.y + button.offsetHeight + 6, document.body, null);
     });
+    return buttons;
+}
+
+function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, smoothAdd = false, canReparse = true, isPlaceholder = false) {
+    currentImgSrc = src;
+    if (metadata) {
+        metadata = interpretMetadata(metadata);
+    }
+    currentMetadataVal = metadata;
+    let isVideo = isVideoExt(src);
+    let isAudio = isAudioExt(src);
+    if ((smoothAdd || !metadata) && canReparse && !isVideo && !isAudio) {
+        let image = new Image();
+        image.onload = () => {
+            if (!metadata) {
+                parseMetadata(image, (data, parsedMetadata) => {
+                    setCurrentImage(src, parsedMetadata, batchId, previewGrow, false, false);
+                });
+            }
+            else {
+                setCurrentImage(src, metadata, batchId, previewGrow, false, false);
+            }
+        };
+        image.src = src;
+        return;
+    }
+    let curImg = getRequiredElementById('current_image');
+    if (isPlaceholder) {
+        curImg.classList.add('current_image_placeholder');
+    }
+    else {
+        curImg.classList.remove('current_image_placeholder');
+    }
+    let img;
+    let isReuse = false;
+    let srcTarget;
+    if (isVideo) {
+        curImg.innerHTML = '';
+        img = document.createElement('video');
+        img.loop = true;
+        img.autoplay = true;
+        img.controls = true;
+        let sourceObj = document.createElement('source');
+        srcTarget = sourceObj;
+        sourceObj.type = isVideo;
+        img.appendChild(sourceObj);
+    }
+    else if (isAudio) {
+        curImg.innerHTML = '';
+        img = document.createElement('audio');
+        img.controls = true;
+        srcTarget = img;
+    }
+    else {
+        img = document.getElementById('current_image_img');
+        if (!img || img.tagName != 'IMG') {
+            curImg.innerHTML = '';
+            img = document.createElement('img');
+        }
+        else {
+            isReuse = true;
+            delete img.dataset.previewGrow;
+            img.removeAttribute('width');
+            img.removeAttribute('height');
+        }
+        srcTarget = img;
+    }
+    function naturalDim() {
+        if (isVideo) {
+            return [img.videoWidth, img.videoHeight];
+        }
+        else if (isAudio) {
+            return [200, 50];
+        }
+        else {
+            return [img.naturalWidth, img.naturalHeight];
+        }
+    }
+    img.onload = () => {
+        let [width, height] = naturalDim();
+        if (previewGrow || getUserSetting('centerimagealwaysgrow')) {
+            img.width = width * 8;
+            img.height = height * 8;
+            img.dataset.previewGrow = 'true';
+        }
+        alignImageDataFormat();
+    }
+    if (isVideo || isAudio) {
+        img.addEventListener('loadeddata', function() {
+            if (img) {
+                img.onload();
+            }
+        }, false);
+    }
+    srcTarget.src = src;
+    img.className = 'current-image-img';
+    img.id = 'current_image_img';
+    img.dataset.src = src;
+    img.dataset.metadata = metadata || '{}';
+    img.dataset.batch_id = batchId;
+    img.onclick = () => imageFullView.showImage(img.dataset.src, img.dataset.metadata, img.dataset.batch_id);
+    let extrasWrapper = isReuse ? document.getElementById('current-image-extras-wrapper') : createDiv('current-image-extras-wrapper', 'current-image-extras-wrapper');
+    extrasWrapper.innerHTML = '';
+    let imagePathClean = getImageFullSrc(src);
+    let isDataImage = src.startsWith('data:');
+    let buttons = buildCurrentImageButtons(img, src, imagePathClean, metadata, isDataImage, naturalDim);
     extrasWrapper.appendChild(buttons);
     let data = createDiv(null, 'current-image-data');
     data.innerHTML = formatMetadata(metadata);
