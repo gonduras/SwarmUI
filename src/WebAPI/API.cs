@@ -36,7 +36,6 @@ public class API
     /// <summary>Web access call route, triggered from <see cref="WebServer"/>.</summary>
     public static async Task HandleAsyncRequest(HttpContext context)
     {
-        // TODO: Validate that 'async' is truly async here. If needed, spin up our own threads.
         Session session = null;
         void Error(string message)
         {
@@ -46,6 +45,7 @@ public class API
         WebSocket socket = null;
         try
         {
+            await Task.Yield();
             JObject input;
             // TODO: Receive limits should be low for unaunthenticated sessions, higher for authenticated ones.
             if (context.WebSockets.IsWebSocketRequest)
