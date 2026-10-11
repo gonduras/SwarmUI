@@ -663,6 +663,139 @@ function getImageFullSrc(src) {
     return fullSrc;
 }
 
+function actionUseAsInit(img, imagePathClean) {
+    let initImageParam = document.getElementById('input_initimage');
+    if (initImageParam) {
+        let type = img.src.substring(img.src.lastIndexOf('.') + 1);
+        let set = (blob) => {
+            let file = new File([blob], imagePathClean, { type: `image/${type.length > 0 && type.length < 20 ? type : 'png'}` });
+            let container = new DataTransfer();
+            container.items.add(file);
+            initImageParam.files = container.files;
+            triggerChangeFor(initImageParam);
+            toggleGroupOpen(initImageParam, true);
+            let toggler = getRequiredElementById('input_group_content_initimage_toggle');
+            toggler.checked = true;
+            triggerChangeFor(toggler);
+        };
+        if (img.dataset.src && (img.dataset.src.startsWith('data:') || img.dataset.src.startsWith('/') || img.dataset.src.startsWith('View/'))) {
+            fetch(img.dataset.src).then(response => response.blob()).then(blob => {
+                set(blob);
+            });
+        }
+        else {
+            let tmpImg = new Image();
+            tmpImg.crossOrigin = 'Anonymous';
+            tmpImg.onload = () => {
+                let canvas = document.createElement('canvas');
+                canvas.width = tmpImg.naturalWidth;
+                canvas.height = tmpImg.naturalHeight;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(tmpImg, 0, 0);
+                canvas.toBlob(blob => {
+                    set(blob);
+                });
+            };
+            tmpImg.src = img.src;
+        }
+    }
+}
+
+function actionUseAsImagePrompt(img, imagePathClean) {
+    let altPromptRegion = document.getElementById('alt_prompt_region');
+    if (!altPromptRegion) {
+        return;
+    }
+    let tmpImg = new Image();
+    tmpImg.crossOrigin = 'Anonymous';
+    tmpImg.onload = () => {
+        let canvas = document.createElement('canvas');
+        canvas.width = tmpImg.naturalWidth;
+        canvas.height = tmpImg.naturalHeight;
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(tmpImg, 0, 0);
+        canvas.toBlob(blob => {
+            let type = img.src.substring(img.src.lastIndexOf('.') + 1);
+            let file = new File([blob], imagePathClean, { type: `image/${type.length > 0 && type.length < 20 ? type : 'png'}` });
+            imagePromptAddImage(file);
+        });
+    };
+    tmpImg.src = img.src;
+}
+
+function actionEditImage(img) {
+    let initImageGroupToggle = document.getElementById('input_group_content_initimage_toggle');
+    if (initImageGroupToggle) {
+        initImageGroupToggle.checked = true;
+        triggerChangeFor(initImageGroupToggle);
+    }
+    let initImageParam = document.getElementById('input_initimage');
+    if (!initImageParam) {
+        showError('Cannot use "Edit Image": Init Image parameter not found\nIf you have a custom workflow, deactivate it, or add an Init Image parameter.');
+        return;
+    }
+    let inputWidth = document.getElementById('input_width');
+    let inputHeight = document.getElementById('input_height');
+    let inputAspectRatio = document.getElementById('input_aspectratio');
+    if (inputWidth && inputHeight) {
+        inputWidth.value = img.naturalWidth;
+        inputHeight.value = img.naturalHeight;
+        triggerChangeFor(inputWidth);
+        triggerChangeFor(inputHeight);
+    }
+    if (inputAspectRatio) {
+        inputAspectRatio.value = 'Custom';
+        triggerChangeFor(inputAspectRatio);
+    }
+    imageEditor.setBaseImage(img);
+    imageEditor.activate();
+}
+
+function actionUpscale2x(img, naturalDim) {
+    toDataURL(img.src, (url => {
+        let [width, height] = naturalDim();
+        let input_overrides = {
+            'initimage': url,
+            'images': 1,
+            'aspectratio': 'Custom',
+            'width': width * 2,
+            'height': height * 2
+        };
+        mainGenHandler.doGenerate(input_overrides, { 'initimagecreativity': 0.4 });
+    }));
+}
+
+function actionRefineImage(img, currentMetadataVal) {
+    toDataURL(img.src, (url => {
+        let input_overrides = {
+            'initimage': url,
+            'initimagecreativity': 0,
+            'images': 1
+        };
+        if (currentMetadataVal) {
+            let readable = interpretMetadata(currentMetadataVal);
+            let metadata = readable ? JSON.parse(readable).sui_image_params : {};
+            if ('seed' in metadata) {
+                input_overrides['seed'] = metadata.seed;
+            }
+        }
+        let togglerInit = getRequiredElementById('input_group_content_initimage_toggle');
+        let togglerRefine = getRequiredElementById('input_group_content_refineupscale_toggle');
+        let togglerInitOriginal = togglerInit.checked;
+        let togglerRefineOriginal = togglerRefine.checked;
+        togglerInit.checked = false;
+        togglerRefine.checked = true;
+        triggerChangeFor(togglerInit);
+        triggerChangeFor(togglerRefine);
+        mainGenHandler.doGenerate(input_overrides, {}, () => {
+            togglerInit.checked = togglerInitOriginal;
+            togglerRefine.checked = togglerRefineOriginal;
+            triggerChangeFor(togglerInit);
+            triggerChangeFor(togglerRefine);
+        });
+    }));
+}
+
 function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, smoothAdd = false, canReparse = true, isPlaceholder = false) {
     currentImgSrc = src;
     if (metadata) {
@@ -785,134 +918,11 @@ function setCurrentImage(src, metadata = '', batchId = '', previewGrow = false, 
         }
     }
     let isDataImage = src.startsWith('data:');
-    includeButton('Use As Init', () => {
-        let initImageParam = document.getElementById('input_initimage');
-        if (initImageParam) {
-            let type = img.src.substring(img.src.lastIndexOf('.') + 1);
-            let set = (blob) => {
-                let file = new File([blob], imagePathClean, { type: `image/${type.length > 0 && type.length < 20 ? type : 'png'}` });
-                let container = new DataTransfer();
-                container.items.add(file);
-                initImageParam.files = container.files;
-                triggerChangeFor(initImageParam);
-                toggleGroupOpen(initImageParam, true);
-                let toggler = getRequiredElementById('input_group_content_initimage_toggle');
-                toggler.checked = true;
-                triggerChangeFor(toggler);
-            };
-            if (img.dataset.src && (img.dataset.src.startsWith('data:') || img.dataset.src.startsWith('/') || img.dataset.src.startsWith('View/'))) {
-                fetch(img.dataset.src).then(response => response.blob()).then(blob => {
-                    set(blob);
-                });
-            }
-            else {
-                let tmpImg = new Image();
-                tmpImg.crossOrigin = 'Anonymous';
-                tmpImg.onload = () => {
-                    let canvas = document.createElement('canvas');
-                    canvas.width = tmpImg.naturalWidth;
-                    canvas.height = tmpImg.naturalHeight;
-                    let ctx = canvas.getContext('2d');
-                    ctx.drawImage(tmpImg, 0, 0);
-                    canvas.toBlob(blob => {
-                        set(blob);
-                    });
-                };
-                tmpImg.src = img.src;
-            }
-        }
-    }, '', 'Sets this image as the Init Image parameter input');
-    includeButton('Use As Image Prompt', () => {
-        let altPromptRegion = document.getElementById('alt_prompt_region');
-        if (!altPromptRegion) {
-            return;
-        }
-        let tmpImg = new Image();
-        tmpImg.crossOrigin = 'Anonymous';
-        tmpImg.onload = () => {
-            let canvas = document.createElement('canvas');
-            canvas.width = tmpImg.naturalWidth;
-            canvas.height = tmpImg.naturalHeight;
-            let ctx = canvas.getContext('2d');
-            ctx.drawImage(tmpImg, 0, 0);
-            canvas.toBlob(blob => {
-                let type = img.src.substring(img.src.lastIndexOf('.') + 1);
-                let file = new File([blob], imagePathClean, { type: `image/${type.length > 0 && type.length < 20 ? type : 'png'}` });
-                imagePromptAddImage(file);
-            });
-        };
-        tmpImg.src = img.src;
-    }, '', 'Uses this image as an Image Prompt input');
-    includeButton('Edit Image', () => {
-        let initImageGroupToggle = document.getElementById('input_group_content_initimage_toggle');
-        if (initImageGroupToggle) {
-            initImageGroupToggle.checked = true;
-            triggerChangeFor(initImageGroupToggle);
-        }
-        let initImageParam = document.getElementById('input_initimage');
-        if (!initImageParam) {
-            showError('Cannot use "Edit Image": Init Image parameter not found\nIf you have a custom workflow, deactivate it, or add an Init Image parameter.');
-            return;
-        }
-        let inputWidth = document.getElementById('input_width');
-        let inputHeight = document.getElementById('input_height');
-        let inputAspectRatio = document.getElementById('input_aspectratio');
-        if (inputWidth && inputHeight) {
-            inputWidth.value = img.naturalWidth;
-            inputHeight.value = img.naturalHeight;
-            triggerChangeFor(inputWidth);
-            triggerChangeFor(inputHeight);
-        }
-        if (inputAspectRatio) {
-            inputAspectRatio.value = 'Custom';
-            triggerChangeFor(inputAspectRatio);
-        }
-        imageEditor.setBaseImage(img);
-        imageEditor.activate();
-    }, '', 'Opens an Image Editor for this image');
-    includeButton('Upscale 2x', () => {
-        toDataURL(img.src, (url => {
-            let [width, height] = naturalDim();
-            let input_overrides = {
-                'initimage': url,
-                'images': 1,
-                'aspectratio': 'Custom',
-                'width': width * 2,
-                'height': height * 2
-            };
-            mainGenHandler.doGenerate(input_overrides, { 'initimagecreativity': 0.4 });
-        }));
-    }, '', 'Runs an instant generation with this image as the input and scale doubled');
-    includeButton('Refine Image', () => {
-        toDataURL(img.src, (url => {
-            let input_overrides = {
-                'initimage': url,
-                'initimagecreativity': 0,
-                'images': 1
-            };
-            if (currentMetadataVal) {
-                let readable = interpretMetadata(currentMetadataVal);
-                let metadata = readable ? JSON.parse(readable).sui_image_params : {};
-                if ('seed' in metadata) {
-                    input_overrides['seed'] = metadata.seed;
-                }
-            }
-            let togglerInit = getRequiredElementById('input_group_content_initimage_toggle');
-            let togglerRefine = getRequiredElementById('input_group_content_refineupscale_toggle');
-            let togglerInitOriginal = togglerInit.checked;
-            let togglerRefineOriginal = togglerRefine.checked;
-            togglerInit.checked = false;
-            togglerRefine.checked = true;
-            triggerChangeFor(togglerInit);
-            triggerChangeFor(togglerRefine);
-            mainGenHandler.doGenerate(input_overrides, {}, () => {
-                togglerInit.checked = togglerInitOriginal;
-                togglerRefine.checked = togglerRefineOriginal;
-                triggerChangeFor(togglerInit);
-                triggerChangeFor(togglerRefine);
-            });
-        }));
-    }, '', 'Runs an instant generation with Refine / Upscale turned on');
+    includeButton('Use As Init', () => actionUseAsInit(img, imagePathClean), '', 'Sets this image as the Init Image parameter input');
+    includeButton('Use As Image Prompt', () => actionUseAsImagePrompt(img, imagePathClean), '', 'Uses this image as an Image Prompt input');
+    includeButton('Edit Image', () => actionEditImage(img), '', 'Opens an Image Editor for this image');
+    includeButton('Upscale 2x', () => actionUpscale2x(img, naturalDim), '', 'Runs an instant generation with this image as the input and scale doubled');
+    includeButton('Refine Image', () => actionRefineImage(img, currentMetadataVal), '', 'Runs an instant generation with Refine / Upscale turned on');
     let metaParsed = { is_starred: false };
     if (metadata) {
         try {
