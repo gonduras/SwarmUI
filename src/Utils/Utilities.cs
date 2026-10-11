@@ -103,6 +103,40 @@ public static class Utilities
         Program.RequestRestart();
     }
 
+    /// <summary>Securely open a web browser to a URL.</summary>
+    public static void OpenWebBrowser(string url)
+    {
+        try
+        {
+            ProcessStartInfo psi = new() { UseShellExecute = false };
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                psi.FileName = "explorer";
+                psi.ArgumentList.Add(url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                psi.FileName = "xdg-open";
+                psi.ArgumentList.Add(url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                psi.FileName = "open";
+                psi.ArgumentList.Add(url);
+            }
+            else
+            {
+                Logs.Error($"Cannot open browser, unknown OS for URL: {url}");
+                return;
+            }
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            Logs.Error($"Failed to open web browser: {ex.Message}");
+        }
+    }
+
     /// <summary>Internal tick loop thread main method.</summary>
     public static void TickLoop()
     {
