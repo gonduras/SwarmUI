@@ -47,11 +47,33 @@ public class API
         try
         {
             JObject input;
-            // TODO: Receive limits should be low for unaunthenticated sessions, higher for authenticated ones.
+
+            // We need to resolve session *before* we read JSON so we know what size limit to apply
+            if (session is null && context.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
+            {
+                string cookies = cookieHeader.ToString();
+                string session_id = cookies.After("session_id=").Before(';');
+                if (!string.IsNullOrWhiteSpace(session_id))
+                {
+                    Program.Sessions.TryGetSession(session_id, out session);
+                }
+            }
+            if (session is null && context.Request.Headers.TryGetValue("Authorization", out var authHeader))
+            {
+                string auth = authHeader.ToString();
+                if (auth.StartsWith("Bearer "))
+                {
+                    string session_id = auth.Substring("Bearer ".Length);
+                    Program.Sessions.TryGetSession(session_id, out session);
+                }
+            }
+
+            long maxJsonBytes = (session is null ? Program.ServerSettings.Network.UnauthenticatedMaxJsonMegabytes : Program.ServerSettings.Network.AuthenticatedMaxJsonMegabytes) * 1024L * 1024L;
+
             if (context.WebSockets.IsWebSocketRequest)
             {
                 socket = await context.WebSockets.AcceptWebSocketAsync();
-                input = await socket.ReceiveJson(TimeSpan.FromMinutes(1), 100 * 1024 * 1024); // TODO: Configurable limits
+                input = await socket.ReceiveJson(TimeSpan.FromMinutes(1), (int)maxJsonBytes);
             }
             else if (context.Request.Method == "POST")
             {
@@ -61,7 +83,7 @@ public class API
                     context.Response.Redirect("/Error/BasicAPI");
                     return;
                 }
-                if (context.Request.ContentLength <= 0 || context.Request.ContentLength >= 100 * 1024 * 1024) // TODO: Configurable limits
+                if (context.Request.ContentLength <= 0 || context.Request.ContentLength >= maxJsonBytes)
                 {
                     Error($"Request has invalid content length: {context.Request.ContentLength}");
                     context.Response.Redirect("/Error/BasicAPI");
