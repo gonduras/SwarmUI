@@ -276,7 +276,7 @@ public class GridGeneratorExtension : Extension
     {
         if (gridName.StartsWith("history/"))
         {
-            await T2IAPI.DeleteImage(session, $"Grids/{gridName.After('/')}/swarm_save_config.json");
+            await ImageAPI.DeleteImage(session, $"Grids/{gridName.After('/')}/swarm_save_config.json");
             LoadableHistoryList.TryRemove(session.User.UserID, out _);
             return new JObject() { ["success"] = true };
         }
