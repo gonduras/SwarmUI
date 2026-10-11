@@ -570,7 +570,7 @@ public static class Utilities
     /// <summary>Guesses the content type based on path for common file types.</summary>
     public static string GuessContentType(string path)
     {
-        string extension = path.AfterLast('.');
+        string extension = path.AfterLast('.').ToLowerFast();
         return CommonContentTypes.GetValueOrDefault(extension, "application/octet-stream");
     }
 
