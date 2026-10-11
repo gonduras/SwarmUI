@@ -388,26 +388,26 @@ public class WebServer
     {
         path = path.Replace('\\', '/').Replace("%20", " ");
         path = Utilities.FilePathForbidden.TrimToNonMatches(path);
-        while (path.Contains(".."))
+
+        string absoluteRoot = Path.GetFullPath(root).Replace('\\', '/');
+        if (!absoluteRoot.EndsWith('/'))
         {
-            path = path.Replace("..", "");
+            absoluteRoot += '/';
         }
-        root = root.Replace('\\', '/');
-        path = $"{root}/{path.Trim()}";
-        while (path.Contains("//"))
+
+        string absolutePath = Path.GetFullPath(Path.Combine(absoluteRoot, path.TrimStart('/'))).Replace('\\', '/');
+
+        if (!absolutePath.StartsWith(absoluteRoot))
         {
-            path = path.Replace("//", "/");
-        }
-        if (!Directory.GetParent(path).FullName.Replace('\\', '/').StartsWith(root))
-        {
-            return (null, $"Refusing dangerous access, got path '{path}' which resolves to '{Directory.GetParent(path)}' which does not obey expected root '{root}'",
+            return (null, $"Refusing dangerous access, got path '{path}' which resolves to '{absolutePath}' which does not obey expected root '{absoluteRoot}'",
                 "Unacceptable path. If you are the server owner, check program console log.");
         }
-        if (path.EndsWith('/'))
+
+        if (absolutePath.EndsWith('/'))
         {
-            path = path[..^1];
+            absolutePath = absolutePath[..^1];
         }
-        return (path, null, null);
+        return (absolutePath, null, null);
     }
 
     /// <summary>Web route for scripts from extensions.</summary>
