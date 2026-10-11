@@ -135,7 +135,11 @@ public static class T2IAPI
             if (tasks.IsEmpty())
             {
                 await socket.SendJson(new JObject() { ["socket_intention"] = "close" }, API.WebsocketTimeout);
-                await Task.Delay(TimeSpan.FromSeconds(2)); // Give 2 seconds to allow a new gen request before actually closing
+                Task delayTask = Task.Delay(TimeSpan.FromSeconds(2)); // Give 2 seconds to allow a new gen request before actually closing
+                while (tasks.IsEmpty() && !delayTask.IsCompleted)
+                {
+                    await Task.Delay(50);
+                }
                 if (tasks.IsEmpty())
                 {
                     Volatile.Write(ref ended, true);
