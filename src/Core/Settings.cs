@@ -233,6 +233,9 @@ public class Settings : AutoConfiguration
 
         [ConfigComment("How many entries in an X-Forwarded-For header to trust.\nDefaults to 3.\nSet to 0 to not trust any forwarded-for.")]
         public int MaxXForwardedFor = 3;
+
+        [ConfigComment("How long to wait for a websocket connection to close, send, or receive before timing out.\nDefaults to 2 minutes.")]
+        public double WebsocketTimeoutMinutes = 2;
     }
 
     /// <summary>Settings related to file paths.</summary>
