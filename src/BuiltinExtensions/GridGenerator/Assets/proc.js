@@ -773,10 +773,11 @@ function makeImage(minRow = 0, doClear = true) {
         var label = row.getElementsByClassName('axis_label_td')[0];
         rowData.push({ row, images, real_images, height, label, y });
     }
-    var holder = document.getElementById('save_image_output');
+
     if (doClear) {
         removeGeneratedImages();
     }
+
     // Temporary canvas to measure what padding we need
     var canvas = new OffscreenCanvas(256, 256);
     var ctx = canvas.getContext('2d');
@@ -793,10 +794,46 @@ function makeImage(minRow = 0, doClear = true) {
     }
     pad_x = Math.min(pad_x, widest_width / 2);
     pad_x += 5;
+
     canvas = document.createElement('canvas');
     canvas.width = (widest_width + 1) * columns + pad_x;
     canvas.height = total_height + pad_y;
     ctx = canvas.getContext('2d');
+
+    drawBackground(ctx, canvas, headers, rowData, widest_width, pad_x, pad_y);
+    drawGridLines(ctx, canvas, columns, rowData, widest_width, pad_x);
+    drawTextLabels(ctx, canvas, headers, rowData, widest_width, pad_x);
+    drawImagesToCanvas(ctx, rowData, widest_width, pad_x, sizeMult);
+    outputImageToModal(canvas);
+}
+
+
+function wrapText(ctx, text, width) {
+    var words = text.split(' ');
+    var lines = [];
+    var line = '';
+    for (var word of words) {
+        var newLine = line + word + ' ';
+        if (ctx.measureText(newLine).width > width) {
+            lines.push(line);
+            line = word + ' ';
+        }
+        else {
+            line = newLine;
+        }
+    }
+    lines.push(line);
+    return lines.join('\n');
+}
+
+function writeMultilineText(ctx, text, x, y) {
+    for (var line of text.split('\n')) {
+        ctx.fillText(line, x, y);
+        y += 16;
+    }
+}
+
+function drawBackground(ctx, canvas, headers, rowData, widest_width, pad_x, pad_y) {
     // Background
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width, canvas.height);
@@ -828,27 +865,31 @@ function makeImage(minRow = 0, doClear = true) {
             ctx.fill();
         }
     }
-    // Grid lines
+}
+
+function drawGridLines(ctx, canvas, columns, rowData, widest_width, pad_x) {
     ctx.fillStyle = '#000000';
     for (var row of rowData) {
         ctx.beginPath();
         ctx.rect(0, row.y, canvas.width, 1);
         ctx.fill();
     }
-    grid_x = pad_x - 1;
+    var grid_x = pad_x - 1;
     for (var i = 0; i < columns; i++) {
         ctx.beginPath();
         ctx.rect(grid_x, 0, 1, canvas.height);
         ctx.fill();
         grid_x += widest_width + 1;
     }
-    // Text Labels
+}
+
+function drawTextLabels(ctx, canvas, headers, rowData, widest_width, pad_x) {
     ctx.font = '16px sans';
     ctx.textBaseline = 'top';
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width, canvas.height);
-    grid_x = pad_x + 5;
+    var grid_x = pad_x + 5;
     for (var part of headers) {
         var blocks = part.getElementsByTagName('b');
         if (blocks.length == 2) {
@@ -860,39 +901,19 @@ function makeImage(minRow = 0, doClear = true) {
         }
         grid_x += widest_width + 1;
     }
-    function wrap(text, width) {
-        var words = text.split(' ');
-        var lines = [];
-        var line = '';
-        for (var word of words) {
-            var newLine = line + word + ' ';
-            if (ctx.measureText(newLine).width > width) {
-                lines.push(line);
-                line = word + ' ';
-            }
-            else {
-                line = newLine;
-            }
-        }
-        lines.push(line);
-        return lines.join('\n');
-    }
-    function writeMultiline(ctx, text, x, y) {
-        for (var line of text.split('\n')) {
-            ctx.fillText(line, x, y);
-            y += 16;
-        }
-    }
+
     for (var row of rowData) {
         var blocks = row.label.getElementsByTagName('b');
         if (blocks.length == 2) {
-            writeMultiline(ctx, wrap(blocks[0].textContent + "\n" + blocks[1].textContent, widest_width / 2), 5, row.y + 4);
+            writeMultilineText(ctx, wrapText(ctx, blocks[0].textContent + "\n" + blocks[1].textContent, widest_width / 2), 5, row.y + 4);
         }
         else {
-            writeMultiline(ctx, wrap(blocks[0].textContent, widest_width / 2), 5, row.y + 25);
+            writeMultilineText(ctx, wrapText(ctx, blocks[0].textContent, widest_width / 2), 5, row.y + 25);
         }
     }
-    // Images
+}
+
+function drawImagesToCanvas(ctx, rowData, widest_width, pad_x, sizeMult) {
     for (var row of rowData) {
         var x = pad_x;
         for (var image of row.images) {
@@ -902,6 +923,10 @@ function makeImage(minRow = 0, doClear = true) {
             }
         }
     }
+}
+
+function outputImageToModal(canvas) {
+    var holder = document.getElementById('save_image_output');
     var imageType = document.getElementById('makeimage_type').value;
     try {
         var data = canvas.toDataURL(`image/${imageType}`);
@@ -919,6 +944,7 @@ function makeImage(minRow = 0, doClear = true) {
     }
     $('#save_image_output_modal').modal('show');
 }
+
 
 function makeGif() {
     let holder = document.getElementById('save_image_output');
