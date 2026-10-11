@@ -210,6 +210,9 @@ public class Settings : AutoConfiguration
         [ConfigComment("Backends are automatically assigned unique ports. This value selects which port number to start the assignment from.\nDefault is '7820'.")]
         public int BackendStartingPort = 7820;
 
+        [ConfigComment("How long to wait for a websocket to respond before timing out. Default is 2 minutes.")]
+        public double WebsocketTimeout = 2;
+
         [ConfigComment("If enabled, backend starting port will be randomly offset at each restart.\nThis is an obscure bug fix for 'stuck ports', where restarting and reusing the same backend port causes strange misbehaviors.")]
         public bool BackendPortRandomize = false;
 
