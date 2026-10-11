@@ -293,8 +293,11 @@ let lastScoreBump = Date.now();
 let scoreBumpTracker = null;
 let scoreMin = 0, scoreMax = 1;
 
-function getXAxisContent(x, y, xAxis, yval, x2Axis, x2val, y2Axis, y2val) {
-    let scriptDump = document.getElementById('image_script_dump');
+
+
+
+
+function getImagePath(x, y, yval, x2Axis, x2val, y2Axis, y2val) {
     let imgPath = [];
     let index = 0;
     for (let subAxis of rawData.axes) {
@@ -315,9 +318,96 @@ function getXAxisContent(x, y, xAxis, yval, x2Axis, x2val, y2Axis, y2val) {
             imgPath.push(getSelectedValKey(subAxis));
         }
     }
+    return { imgPath, index };
+}
+
+function processScoreUpdates(doScores) {
+    if (Date.now() - lastScoreBump > 300) {
+        clearInterval(scoreBumpTracker);
+        scoreBumpTracker = null;
+        if (doScores) {
+            scoreMin = 1;
+            scoreMax = 0;
+            for (let image of document.getElementsByClassName('table_img')) {
+                let score = getScoreFor(image.dataset.img_path);
+                if (score) {
+                    scoreMin = Math.min(scoreMin, score);
+                    scoreMax = Math.max(scoreMax, score);
+                }
+            }
+            let upds = scoreUpdates;
+            scoreUpdates = [];
+            for (let update of upds) {
+                update();
+            }
+            updateScaling();
+        }
+    }
+}
+
+function updateScore(id, slashed, scoreDisplay) {
+    let score = getScoreFor(slashed);
+    if (score) {
+        score = (score - scoreMin) / (scoreMax - scoreMin);
+        let elem = document.getElementById(`td-img-${id}`);
+        let color = percentToRedGreen(score * 100);
+        let blockColor = '';
+        if (scoreDisplay == 'Thin Outline')
+        {
+            let xborder = `border-top: 2px solid ${color}; border-bottom: 2px solid ${color};`;
+            let yborder = `border-left: 2px solid ${color}; border-right: 2px solid ${color};`;
+            elem.getElementsByTagName('img')[0].style = `${xborder} ${yborder}`;
+        }
+        else if (scoreDisplay == 'Thick Bars')
+        {
+            elem.getElementsByTagName('img')[0].style = `border-top: 10px solid ${color}; border-left: 10px solid ${color};`;
+        }
+        else if (scoreDisplay == 'Heatmap')
+        {
+            blockColor = `color-mix(in srgb, ${color} 50%, transparent)`;
+        }
+        elem.firstChild.innerHTML = `<div style="position: relative; width: 0; height: 0"><div style="position: absolute; left: 0; z-index: 20;">${Math.round(score * 100)}%</div><div class="heatmapper" style="position: absolute; left: 0; width: 100px; height: 100px; z-index: 10; background-color: ${blockColor}"></div></div>`;
+    }
+}
+
+function generateCellContent(id, slashed, ext, actualUrl) {
+    let newContent = `<td id="td-img-${id}"><span></span>`;
+    if (ext == 'mp4' || ext == 'webm' || ext == 'mov') {
+        newContent += `<video loop autoplay muted class="table_img" data-img_path="${slashed}" onclick="doPopupFor(this)" onerror="setImgPlaceholder(this)" alt="${actualUrl}"><source src="${actualUrl}" type="video/${ext}"></source></video>`;
+    }
+    else {
+        newContent += `<img class="table_img" data-img_path="${slashed}" onclick="doPopupFor(this)" onerror="setImgPlaceholder(this)" src="${actualUrl}" alt="${actualUrl}" />`;
+    }
+    newContent += '</td>';
+    return newContent;
+}
+
+function setupScriptDump(newScr, slashed, actualUrl, doScores, scriptDump) {
+    if (newScr != null) {
+        newScr.onload = () => {
+            setTimeout(() => {
+                lastScoreBump = Date.now();
+                let ext = file_extensions_alt[slashed];
+                if (ext && !actualUrl.endsWith(ext)) {
+                    fix_video(slashed);
+                }
+            }, 1);
+            if (scoreBumpTracker == null) {
+                scoreBumpTracker = setInterval(() => processScoreUpdates(doScores), 100);
+            }
+        };
+        scriptDump.appendChild(newScr);
+    }
+}
+
+function getXAxisContent(x, y, xAxis, yval, x2Axis, x2val, y2Axis, y2val) {
+    let scriptDump = document.getElementById('image_script_dump');
+    let { imgPath, index } = getImagePath(x, y, yval, x2Axis, x2val, y2Axis, y2val);
+
     let newContent = '';
     let subInd = 0;
     let scoreDisplay = document.getElementById('score_display').value;
+
     for (let xVal of xAxis.values) {
         subInd++;
         if (!canShowVal(xAxis.id, xVal.key)) {
@@ -328,85 +418,21 @@ function getXAxisContent(x, y, xAxis, yval, x2Axis, x2val, y2Axis, y2val) {
         let ext = getExtension(slashed);
         let actualUrl = slashed + '.' + ext;
         let id = scoreTrackCounter++;
-        newContent += `<td id="td-img-${id}"><span></span>`;
-        if (ext == 'mp4' || ext == 'webm' || ext == 'mov') {
-            newContent += `<video loop autoplay muted class="table_img" data-img_path="${slashed}" onclick="doPopupFor(this)" onerror="setImgPlaceholder(this)" alt="${actualUrl}"><source src="${actualUrl}" type="video/${ext}"></source></video>`;
-        }
-        else {
-            newContent += `<img class="table_img" data-img_path="${slashed}" onclick="doPopupFor(this)" onerror="setImgPlaceholder(this)" src="${actualUrl}" alt="${actualUrl}" />`;
-        }
-        newContent += '</td>';
+
+        newContent += generateCellContent(id, slashed, ext, actualUrl);
+
         let newScr = null;
         if (typeof getMetadataScriptFor != 'undefined') {
             newScr = document.createElement('script');
             newScr.src = getMetadataScriptFor(slashed);
         }
+
         let doScores = scoreDisplay != 'None' && typeof getScoreFor != 'undefined';
         if (doScores) {
-            scoreUpdates.push(() => {
-                let score = getScoreFor(slashed);
-                if (score) {
-                    score = (score - scoreMin) / (scoreMax - scoreMin);
-                    let elem = document.getElementById(`td-img-${id}`);
-                    let color = percentToRedGreen(score * 100);
-                    let blockColor = '';
-                    if (scoreDisplay == 'Thin Outline')
-                    {
-                        let xborder = `border-top: 2px solid ${color}; border-bottom: 2px solid ${color};`;
-                        let yborder = `border-left: 2px solid ${color}; border-right: 2px solid ${color};`;
-                        elem.getElementsByTagName('img')[0].style = `${xborder} ${yborder}`;
-                    }
-                    else if (scoreDisplay == 'Thick Bars')
-                    {
-                        elem.getElementsByTagName('img')[0].style = `border-top: 10px solid ${color}; border-left: 10px solid ${color};`;
-                    }
-                    else if (scoreDisplay == 'Heatmap')
-                    {
-                        blockColor = `color-mix(in srgb, ${color} 50%, transparent)`;
-                    }
-                    elem.firstChild.innerHTML = `<div style="position: relative; width: 0; height: 0"><div style="position: absolute; left: 0; z-index: 20;">${Math.round(score * 100)}%</div><div class="heatmapper" style="position: absolute; left: 0; width: 100px; height: 100px; z-index: 10; background-color: ${blockColor}"></div></div>`;
-                }
-            });
+            scoreUpdates.push(() => updateScore(id, slashed, scoreDisplay));
         }
-        if (newScr != null) {
-            newScr.onload = () => {
-                setTimeout(() => {
-                    lastScoreBump = Date.now();
-                    let ext = file_extensions_alt[slashed];
-                    if (ext && !actualUrl.endsWith(ext)) {
-                        fix_video(slashed);
-                    }
-                }, 1);
-                if (scoreBumpTracker == null) {
-                    scoreBumpTracker = setInterval(() => {
-                        if (Date.now() - lastScoreBump > 300) {
-                            clearInterval(scoreBumpTracker);
-                            scoreBumpTracker = null;
-                            if (doScores) {
-                                scoreMin = 1;
-                                scoreMax = 0;
-                                for (let image of document.getElementsByClassName('table_img')) {
-                                    let score = getScoreFor(image.dataset.img_path);
-                                    if (score) {
-                                        scoreMin = Math.min(scoreMin, score);
-                                        scoreMax = Math.max(scoreMax, score);
-                                    }
-                                }
-                                let upds = scoreUpdates;
-                                scoreUpdates = [];
-                                for (let update of upds) {
-                                    update();
-                                }
-                                updateScaling();
-                            }
-                        }
-                    }, 100);
-                }
-            };
-        }
-        if (newScr) {
-            scriptDump.appendChild(newScr);
-        }
+
+        setupScriptDump(newScr, slashed, actualUrl, doScores, scriptDump);
     }
     return newContent;
 }
