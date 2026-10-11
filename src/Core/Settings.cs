@@ -233,6 +233,12 @@ public class Settings : AutoConfiguration
 
         [ConfigComment("How many entries in an X-Forwarded-For header to trust.\nDefaults to 3.\nSet to 0 to not trust any forwarded-for.")]
         public int MaxXForwardedFor = 3;
+
+        [ConfigComment("How many minutes before a websocket API request times out.\nDefaults to 1.0.")]
+        public double APIRequestTimeoutMinutes = 1.0;
+
+        [ConfigComment("Maximum payload size in bytes for API requests.\nDefaults to 104857600 (100MB).")]
+        public long APIRequestMaxBytes = 100 * 1024 * 1024;
     }
 
     /// <summary>Settings related to file paths.</summary>
