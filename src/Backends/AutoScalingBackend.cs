@@ -34,7 +34,7 @@ public class AutoScalingBackend : AbstractT2IBackend
         public double MinIdleTime = 10;
 
         [ConfigComment("Minimum number of waiting generations before a new backend can be started.\nSelect this high enough to not be wasteful of resources, but low enough to not cause generation requests to be pending for too long.\nMust be set to at least 1, should ideally be set higher.")]
-        public int MinQueuedBeforeExpand = 10; // TODO: Impl me
+        public int MinQueuedBeforeExpand = 10;
 
         [ConfigComment($"File path to a shell script (normally a '.sh') that will cause a new backend to be started.\nSee <a target=\"_blank\" href=\"{Utilities.RepoDocsRoot}Features/AutoScalingBackend.md\">docs Features/AutoScalingBackend</a> for info on how to build this script.")]
         public string StartScript = "";
@@ -183,6 +183,11 @@ public class AutoScalingBackend : AbstractT2IBackend
             if (CountActiveBackends >= Settings.MaxBackends)
             {
                 Logs.Verbose("Scale request ignored due to max backends count reached.");
+                return BackendHandler.ScaleResult.NoLaunch;
+            }
+            if (Program.Backends.QueuedRequests < Settings.MinQueuedBeforeExpand)
+            {
+                Logs.Verbose($"Scale request ignored due to not enough queued requests (have {Program.Backends.QueuedRequests}, need {Settings.MinQueuedBeforeExpand}).");
                 return BackendHandler.ScaleResult.NoLaunch;
             }
             MustWaitMinutesBeforeStart(Settings.MinWaitBetweenStart);
