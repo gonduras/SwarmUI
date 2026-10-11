@@ -349,11 +349,11 @@ public class Program
                 {
                     case "web":
                         Logs.Init("Launch web browser...");
-                        Process.Start(new ProcessStartInfo(WebServer.PageURL) { UseShellExecute = true });
+                        Utilities.OpenWebBrowser(WebServer.PageURL);
                         break;
                     case "webinstall":
                         Logs.Init("Launch web browser to install page...");
-                        Process.Start(new ProcessStartInfo(WebServer.PageURL + "/Install") { UseShellExecute = true });
+                        Utilities.OpenWebBrowser(WebServer.PageURL + "/Install");
                         break;
                     case "electron":
                         Logs.Init("Electron launch not yet implemented.");
