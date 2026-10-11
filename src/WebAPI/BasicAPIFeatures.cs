@@ -41,6 +41,7 @@ public static class BasicAPIFeatures
         API.RegisterAPICall(ServerDebugMessage, false, Permissions.ServerDebugMessage);
         API.RegisterAPICall(SetAPIKey, true, Permissions.EditUserSettings);
         API.RegisterAPICall(GetAPIKeyStatus, false, Permissions.ReadUserSettings);
+        ImageAPI.Register();
         T2IAPI.Register();
         ModelsAPI.Register();
         BackendAPI.Register();
