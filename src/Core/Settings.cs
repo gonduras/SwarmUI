@@ -144,6 +144,9 @@ public class Settings : AutoConfiguration
     /// <summary>Settings related to backends.</summary>
     public class BackendData : AutoConfiguration
     {
+        [ConfigComment("Queue depth heuristic multiplier for backend request sorting.\nDefaults to 10 (each request waiting adds 10 seconds worth of weight).")]
+        public double QueueDepthHeuristicMultiplier = 10;
+
         [ConfigComment("How many times to retry initializing a backend before giving up. Default is 3.")]
         public int MaxBackendInitAttempts = 3;
 
