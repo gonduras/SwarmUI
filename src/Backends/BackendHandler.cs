@@ -850,8 +850,8 @@ public class BackendHandler
         /// <summary>Set of reasons backends failed to load.</summary>
         public HashSet<string> BackendFailReasons = [];
 
-        /// <summary>Gets a loose heuristic for model order preference - sort by earliest requester, but higher count of requests is worth 10 seconds.</summary>
-        public long Heuristic(long timeRel) => Count * 10 + ((timeRel - TimeFirstRequest) / 1000); // TODO: 10 -> ?
+        /// <summary>Gets a loose heuristic for model order preference - sort by earliest requester, but higher count of requests is weighted.</summary>
+        public long Heuristic(long timeRel) => Count * Program.ServerSettings.Backends.QueueDepthHeuristicWeight + ((timeRel - TimeFirstRequest) / 1000);
     }
 
     /// <summary>Used by <see cref="GetNextT2IBackend(TimeSpan, T2IModel)"/> to determine which model to load onto a backend, heuristically.</summary>
