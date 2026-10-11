@@ -85,6 +85,7 @@ public static class T2IAPI
         using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(Program.GlobalProgramCancel, cancelTok.Token);
         SharedGenT2IData data = new();
         ConcurrentDictionary<Task, Task> tasks = [];
+        CancellationTokenSource newTaskSignal = new();
         static int guessBatchSize(JObject input)
         {
             if (input.TryGetValue("batchsize", out JToken batch))
@@ -110,6 +111,7 @@ public static class T2IAPI
                     int newImages = newInput.Value<int>("images");
                     Task handleMore = API.RunWebsocketHandlerCallWS(GenT2I_Internal, session, (newImages, newInput, data, batchOffset), socket);
                     tasks.TryAdd(handleMore, handleMore);
+                    newTaskSignal.Cancel();
                     Volatile.Write(ref retain, false);
                     batchOffset += newImages * guessBatchSize(newInput);
                 }
@@ -127,15 +129,29 @@ public static class T2IAPI
         tasks.TryAdd(handle, handle);
         while (Volatile.Read(ref retain) || tasks.Any())
         {
-            await Task.WhenAny(tasks.Keys.ToList());
-            foreach (Task t in tasks.Keys.Where(t => t.IsCompleted).ToList())
+            var taskList = tasks.Keys.ToList();
+            if (taskList.Count > 0)
             {
-                tasks.TryRemove(t, out _);
+                await Task.WhenAny(taskList);
+                foreach (Task t in taskList.Where(t => t.IsCompleted))
+                {
+                    tasks.TryRemove(t, out _);
+                }
             }
+
             if (tasks.IsEmpty())
             {
                 await socket.SendJson(new JObject() { ["socket_intention"] = "close" }, API.WebsocketTimeout);
-                await Task.Delay(TimeSpan.FromSeconds(2)); // Give 2 seconds to allow a new gen request before actually closing
+                newTaskSignal = new(); // Reset the signal before waiting
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2), newTaskSignal.Token); // Give 2 seconds to allow a new gen request before actually closing
+                }
+                catch (TaskCanceledException)
+                {
+                    // A new task was added, no need to wait the full 2 seconds
+                }
+
                 if (tasks.IsEmpty())
                 {
                     Volatile.Write(ref ended, true);
