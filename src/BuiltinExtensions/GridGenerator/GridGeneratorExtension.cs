@@ -133,7 +133,8 @@ public class GridGeneratorExtension : Extension
         };
         GridRunnerPreRunHook = (runner) =>
         {
-            // TODO: Progress update
+            SwarmUIGridData data = runner.Grid.LocalData as SwarmUIGridData;
+            data.AddOutput(BasicAPIFeatures.GetCurrentStatusRaw(data.Session));
         };
         GridRunnerPreDryHook = (runner) =>
         {
