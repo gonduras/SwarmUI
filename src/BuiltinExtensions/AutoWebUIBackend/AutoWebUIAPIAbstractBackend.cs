@@ -112,7 +112,10 @@ public abstract class AutoWebUIAPIAbstractBackend : AbstractT2IBackend
             handler(toSend, user_input);
         }
         JObject result = await SendPost<JObject>(route, toSend);
-        // TODO: Error handlers
+        if (result.TryGetValue("error", out JToken errorToken))
+        {
+            throw new InvalidOperationException($"AutoWebUI error: {errorToken}");
+        }
         return [.. result["images"].Select(i => ImageFile.FromBase64((string)i, MediaType.ImagePng) as Image)];
     }
 
