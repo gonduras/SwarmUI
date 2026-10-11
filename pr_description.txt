@@ -1,0 +1,3 @@
+🎯 **What:** The testing gap for `T2IParamTypes.AspectRatioToSizeReference` has been addressed.
+📊 **Coverage:** Covered all valid aspect ratios (e.g., "1:1", "16:9", "3:4") mapping to their expected sizes, as well as edge cases such as invalid strings or empty strings returning `(-1, -1)`.
+✨ **Result:** Improved test coverage and guaranteed robustness for aspect ratio-to-size mappings in `src/Text2Image/T2IParamTypes.cs`.
