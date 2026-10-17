@@ -9,6 +9,7 @@ using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 using SwarmUI.Backends;
 using System;
+using System.IO;
 using System.Net.Http;
 using SwarmUI.Media;
 
@@ -112,7 +113,14 @@ public abstract class AutoWebUIAPIAbstractBackend : AbstractT2IBackend
             handler(toSend, user_input);
         }
         JObject result = await SendPost<JObject>(route, toSend);
-        // TODO: Error handlers
+        if (result.TryGetValue("error", out JToken errorToken))
+        {
+            throw new InvalidOperationException($"AutoWebUI error: {errorToken}");
+        }
+        if (result["images"] == null)
+        {
+            throw new InvalidDataException("AutoWebUI returned invalid data (missing images).");
+        }
         return [.. result["images"].Select(i => ImageFile.FromBase64((string)i, MediaType.ImagePng) as Image)];
     }
 
