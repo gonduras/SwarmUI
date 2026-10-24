@@ -33,10 +33,13 @@ public class Installation
     }
 
     /// <summary>Send a progress update for the installation down the websocket.</summary>
-    public static void UpdateProgress(long progress, long total, long perSec)
+    public static async Task UpdateProgress(long progress, long total, long perSec)
     {
-        // TODO: better way to send these out without waiting
-        InstallSocket.SendJson(new JObject() { ["progress"] = progress, ["total"] = total, ["steps"] = StepsThusFar, ["total_steps"] = TotalSteps, ["per_second"] = perSec }, API.WebsocketTimeout).Wait();
+        try
+        {
+            await InstallSocket.SendJson(new JObject() { ["progress"] = progress, ["total"] = total, ["steps"] = StepsThusFar, ["total_steps"] = TotalSteps, ["per_second"] = perSec }, API.WebsocketTimeout);
+        }
+        catch (Exception) { }
     }
 
     /// <summary>Configure the theme during installation.</summary>
