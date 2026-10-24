@@ -388,26 +388,33 @@ public class WebServer
     {
         path = path.Replace('\\', '/').Replace("%20", " ");
         path = Utilities.FilePathForbidden.TrimToNonMatches(path);
-        while (path.Contains(".."))
-        {
-            path = path.Replace("..", "");
-        }
+
         root = root.Replace('\\', '/');
-        path = $"{root}/{path.Trim()}";
-        while (path.Contains("//"))
+        string fullRoot = Path.GetFullPath(root).Replace('\\', '/');
+
+        // Use path.TrimStart('/') to avoid it acting as absolute path if it starts with /
+        string rawCombined = $"{root}/{path.TrimStart('/')}";
+        while (rawCombined.Contains("//"))
         {
-            path = path.Replace("//", "/");
+            rawCombined = rawCombined.Replace("//", "/");
         }
-        if (!Directory.GetParent(path).FullName.Replace('\\', '/').StartsWith(root))
+        string fullPath = Path.GetFullPath(rawCombined).Replace('\\', '/');
+
+        string rootPrefix = fullRoot.EndsWith("/") ? fullRoot : fullRoot + "/";
+        if (!fullPath.StartsWith(rootPrefix) && fullPath != fullRoot)
         {
-            return (null, $"Refusing dangerous access, got path '{path}' which resolves to '{Directory.GetParent(path)}' which does not obey expected root '{root}'",
+            return (null, $"Refusing dangerous access, got path '{path}' which resolves to '{fullPath}' which does not obey expected root '{fullRoot}'",
                 "Unacceptable path. If you are the server owner, check program console log.");
         }
-        if (path.EndsWith('/'))
+
+        string relative = fullPath.Length > fullRoot.Length ? fullPath.Substring(fullRoot.Length).TrimStart('/') : "";
+        string finalPath = relative == "" ? root : $"{root}/{relative}";
+
+        if (finalPath.EndsWith('/'))
         {
-            path = path[..^1];
+            finalPath = finalPath[..^1];
         }
-        return (path, null, null);
+        return (finalPath, null, null);
     }
 
     /// <summary>Web route for scripts from extensions.</summary>
