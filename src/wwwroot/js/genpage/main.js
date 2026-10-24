@@ -372,14 +372,14 @@ function loadUserData(callback) {
         if (!language) {
             language = data.language;
         }
-        allPresetsUnsorted = data.presets;
-        sortPresets();
-        presetBrowser.lightRefresh();
+        presetHelpers.allPresetsUnsorted = data.presets;
+        presetHelpers.sortPresets();
+        presetHelpers.presetBrowser.lightRefresh();
         if (shouldApplyDefault) {
             shouldApplyDefault = false;
-            let defaultPreset = getPresetByTitle('default');
+            let defaultPreset = presetHelpers.getPresetByTitle('default');
             if (defaultPreset) {
-                applyOnePreset(defaultPreset);
+                presetHelpers.applyOnePreset(defaultPreset);
             }
         }
         if (callback) {
@@ -773,7 +773,7 @@ function genpageLoad() {
                 if (permissions.hasPermission('view_backends_list')) {
                     loadBackendTypesMenu();
                 }
-                selectInitialPresetList();
+                presetHelpers.selectInitialPresetList();
             });
             for (let callback of sessionReadyCallbacks) {
                 callback();
