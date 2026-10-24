@@ -419,7 +419,7 @@ public class ComfyUISelfStartBackend : ComfyUIAPIAbstractBackend
 
     public async Task DoLibFixes(bool doFixFrontend, bool doLatestFrontend)
     {
-        string lib = NetworkBackendUtils.GetProbableLibFolderFor(Settings.StartScript);
+        string lib = await NetworkBackendUtils.GetProbableLibFolderFor(Settings.StartScript);
         if (lib is null || lib.Length < 3)
         {
             AddLoadStatus($"Skip lib validation, can't find folder.");
