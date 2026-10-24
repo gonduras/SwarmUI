@@ -106,6 +106,12 @@ public class Settings : AutoConfiguration
 
         [ConfigComment("Message to add on the login page.\nYou may use (basic!) HTML here.\nIt is recommended to add contact information here, such as a Discord invite code or an email address.")]
         public string LoginNotice = "This is a local instance not yet configured for shared usage. If you're seeing this on the login screen, ask the server owner to fill it in on the Server Configuration page.";
+
+        [ConfigComment("How long the random session ID tokens should be.\nDefault is 40.")]
+        public int SessionIDLength = 40;
+
+        [ConfigComment("How long to store sessions for before considering inactive and deleting (in days).\nDefault is 31.")]
+        public int MaxSessionAgeDays = 31;
     }
 
     /// <summary>Settings related to logging.</summary>
