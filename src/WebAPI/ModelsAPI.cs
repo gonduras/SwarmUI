@@ -611,14 +611,14 @@ public static class ModelsAPI
             }
             Directory.CreateDirectory(Path.GetDirectoryName(outPath));
             using CancellationTokenSource canceller = new();
-            Task downloading = Utilities.DownloadFile(url, tempPath, (progress, total, perSec) =>
+            Task downloading = Utilities.DownloadFile(url, tempPath, async (progress, total, perSec) =>
             {
-                ws.SendJson(new JObject()
+                await ws.SendJson(new JObject()
                 {
                     ["current_percent"] = progress / (double)total,
                     ["overall_percent"] = 0.2,
                     ["per_second"] = perSec
-                }, API.WebsocketTimeout).Wait();
+                }, API.WebsocketTimeout);
             }, canceller, originalUrl, headers: headers);
             Task listenForSignal = Utilities.RunCheckedTask(async () =>
             {

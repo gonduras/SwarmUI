@@ -417,6 +417,7 @@ public class WorkflowGenerator
                         // TODO: Send a signal back so a progress bar can be displayed on a UI
                         nextPerc = Math.Round(perc / 0.05) * 0.05 + 0.05;
                     }
+                    return Task.CompletedTask;
                 }, verifyHash: hash).Wait();
                 File.Move(tmpPath, filePath);
             }
