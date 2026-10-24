@@ -88,7 +88,7 @@ public static class NetworkBackendUtils
     /// <summary>Helper for API-by-URL backends to allow those backends to go idle automatically if connection is lost.</summary>
     public class IdleMonitor
     {
-        public Thread IdleMonitorThread;
+        public Task IdleMonitorTask;
 
         public CancellationTokenSource IdleMonitorCancel = new();
 
@@ -105,8 +105,7 @@ public static class NetworkBackendUtils
             {
                 Backend.Status = BackendStatus.IDLE;
             }
-            IdleMonitorThread = new Thread(IdleMonitorLoop);
-            IdleMonitorThread.Start();
+            IdleMonitorTask = Utilities.RunCheckedTask(IdleMonitorLoop, "IdleMonitor");
         }
 
         void SetStatus(BackendStatus status)
@@ -122,14 +121,14 @@ public static class NetworkBackendUtils
 
         public static bool ExceptionIsNonIdleable(Exception ex) => ex is FormatException;
 
-        public void IdleMonitorLoop()
+        public async Task IdleMonitorLoop()
         {
             CancellationToken cancel = IdleMonitorCancel.Token;
             while (true)
             {
                 try
                 {
-                    Task.Delay(TimeSpan.FromSeconds(5), cancel).Wait();
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancel);
                 }
                 catch (Exception)
                 {
@@ -172,11 +171,11 @@ public static class NetworkBackendUtils
 
         public void Stop()
         {
-            if (IdleMonitorThread is not null)
+            if (IdleMonitorTask is not null)
             {
                 IdleMonitorCancel.Cancel();
                 IdleMonitorCancel = new();
-                IdleMonitorThread = null;
+                IdleMonitorTask = null;
             }
         }
     }
