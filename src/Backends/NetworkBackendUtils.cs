@@ -225,7 +225,7 @@ public static class NetworkBackendUtils
     }
 
     /// <summary>Tries to identify the lib/site-packages/ folder that will be used for a given start script.</summary>
-    public static string GetProbableLibFolderFor(string script)
+    public static async Task<string> GetProbableLibFolderFor(string script)
     {
         string path = script.Replace('\\', '/');
         string dir = Path.GetDirectoryName(path);
@@ -261,9 +261,9 @@ public static class NetworkBackendUtils
             ConfigurePythonExeFor(script, "folder-finder", start, out _, out string forcePrior);
             start.Arguments = $"{forcePrior} -s -c \"import sysconfig; print(sysconfig.get_path('purelib'))\"".Trim();
             Process process = Process.Start(start);
-            process.WaitForExitAsync(Program.GlobalProgramCancel).Wait();
-            string output = process.StandardOutput.ReadToEnd().Trim();
-            string errOut = process.StandardError.ReadToEnd().Trim();
+            await process.WaitForExitAsync(Program.GlobalProgramCancel);
+            string output = (await process.StandardOutput.ReadToEndAsync()).Trim();
+            string errOut = (await process.StandardError.ReadToEndAsync()).Trim();
             Logs.Debug($"Ran python fallback folder-finder '{start.FileName}' '{start.Arguments}', result is: {output}, errOut is {errOut}");
             if (Directory.Exists(output))
             {
