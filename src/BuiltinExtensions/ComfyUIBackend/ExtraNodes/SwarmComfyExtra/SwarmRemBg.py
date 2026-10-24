@@ -1,6 +1,5 @@
-from PIL import Image
-import numpy as np
 import torch
+
 
 class SwarmRemBg:
     @classmethod
@@ -16,6 +15,8 @@ class SwarmRemBg:
     FUNCTION = "rem"
 
     def rem(self, images):
+        from PIL import Image
+        import numpy as np
         from rembg import remove
 
         output = []
@@ -30,8 +31,12 @@ class SwarmRemBg:
                 mask = np.array(img.getchannel('A')).astype(np.float32) / 255.0
                 masks.append(1. - mask)
             else:
-                masks.append(np.zeros((64,64), dtype=np.float32))
-        return (torch.from_numpy(np.array(output)), torch.from_numpy(np.array(masks)))
+                masks.append(np.zeros((64, 64), dtype=np.float32))
+        return (
+            torch.from_numpy(np.array(output)),
+            torch.from_numpy(np.array(masks))
+        )
+
 
 NODE_CLASS_MAPPINGS = {
     "SwarmRemBg": SwarmRemBg,
