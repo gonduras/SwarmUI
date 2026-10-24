@@ -14,10 +14,10 @@ namespace SwarmUI.Accounts;
 public class SessionHandler
 {
     /// <summary>How long the random session ID tokens should be.</summary>
-    public int SessionIDLength = 40; // TODO: Configurable
+    public int SessionIDLength => Program.ServerSettings.UserAuthorization.SessionIDLength;
 
     /// <summary>How long to store sessions for before considering inactive and deleting.</summary>
-    public TimeSpan MaxSessionAge = TimeSpan.FromDays(31); // TODO: Configurable
+    public TimeSpan MaxSessionAge => TimeSpan.FromDays(Program.ServerSettings.UserAuthorization.MaxSessionAgeDays);
 
     /// <summary>Map of currently tracked sessions by ID.</summary>
     public ConcurrentDictionary<string, Session> Sessions = new();
