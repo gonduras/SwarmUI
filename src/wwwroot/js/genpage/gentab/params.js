@@ -943,7 +943,7 @@ function getGenInput(input_overrides = {}, input_preoverrides = {}) {
             }
         }
     }
-    input["presets"] = currentPresets.map(p => p.title);
+    input["presets"] = presetHelpers.currentPresets.map(p => p.title);
     for (let key in input_overrides) {
         let val = input_overrides[key];
         if (val == null) {
@@ -1140,10 +1140,10 @@ function resetParamsToDefault(exclude = [], doDefaultPreset = true) {
         triggerChangeFor(aspect);
     }
     currentModelChanged();
-    clearPresets();
-    let defaultPreset = getPresetByTitle('default');
+    presetHelpers.clearPresets();
+    let defaultPreset = presetHelpers.getPresetByTitle('default');
     if (defaultPreset && doDefaultPreset) {
-        applyOnePreset(defaultPreset);
+        presetHelpers.applyOnePreset(defaultPreset);
     }
     hideUnsupportableParams();
 }

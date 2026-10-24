@@ -253,33 +253,33 @@
     <div class="modal-body">
         <h5>Format:</h5>
         <div class="btn-group" role="group">
-            <input type="radio" class="btn-check" name="btnradio" id="export_preset_format_json" autocomplete="off" checked="" onchange="exportPresetsButton(true)">
+            <input type="radio" class="btn-check" name="btnradio" id="export_preset_format_json" autocomplete="off" checked="" onchange="presetHelpers.exportPresetsButton(true)">
             <label class="btn btn-outline-primary translate" for="export_preset_format_json">SwarmUI JSON</label>
-            <input type="radio" class="btn-check" name="btnradio" id="export_preset_format_csv" autocomplete="off" onchange="exportPresetsButton(true)">
+            <input type="radio" class="btn-check" name="btnradio" id="export_preset_format_csv" autocomplete="off" onchange="presetHelpers.exportPresetsButton(true)">
             <label class="btn btn-outline-primary translate" for="export_preset_format_csv">Prompt only CSV</label>
         </div>
         <br><br>
         <textarea id="export_presets_textarea" style="width: calc(max(500px, 50vw));" rows="10" disabled autocomplete="off"></textarea>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-primary basic-button translate" onclick="exportPresetsDownload()">Download</button>
-        <button type="button" class="btn btn-secondary basic-button translate" onclick="closeExportPresetViewer()">Close</button>
+        <button type="button" class="btn btn-primary basic-button translate" onclick="presetHelpers.exportPresetsDownload()">Download</button>
+        <button type="button" class="btn btn-secondary basic-button translate" onclick="presetHelpers.closeExportPresetViewer()">Close</button>
     </div>
 @WebUtil.ModalFooter()
 @WebUtil.ModalHeader("import_presets_modal", "Import Presets")
     <div class="modal-body">
         <div id="import_preset_upload_container">
-            <input type="file" id="import_preset_uploader" oninput="importPresetUpload()" /> &nbsp;<label for="import_preset_uploader" class="translate">Upload Preset File (JSON or CSV)</label>
-            <textarea id="import_presets_textarea" style="width: calc(max(500px, 50vw));" rows="10" oninput="importPresetsCheck()"></textarea>
+            <input type="file" id="import_preset_uploader" oninput="presetHelpers.importPresetUpload()" /> &nbsp;<label for="import_preset_uploader" class="translate">Upload Preset File (JSON or CSV)</label>
+            <textarea id="import_presets_textarea" style="width: calc(max(500px, 50vw));" rows="10" oninput="presetHelpers.importPresetsCheck()"></textarea>
         </div>
         <span class="form-check form-switch display-inline-block">
-            <input type="checkbox" class="form-check-input" id="import_presets_overwrite" onchange="importPresetsCheck()"> <label class="form-check-label translate" for="import_presets_overwrite">Overwrite existing presets</label>
+            <input type="checkbox" class="form-check-input" id="import_presets_overwrite" onchange="presetHelpers.importPresetsCheck()"> <label class="form-check-label translate" for="import_presets_overwrite">Overwrite existing presets</label>
         </span>
     </div>
     <div class="modal-footer">
         <span id="import_preset_modal_error" class="modal_error_bottom"></span>
-        <button type="button" class="btn btn-primary basic-button translate" id="import_presets_activate_button" onclick="importPresetsActivate()" disabled autocomplete="off">Import</button>
-        <button type="button" class="btn btn-secondary basic-button translate" onclick="closeImportPresetViewer()">Cancel</button>
+        <button type="button" class="btn btn-primary basic-button translate" id="import_presets_activate_button" onclick="presetHelpers.importPresetsActivate()" disabled autocomplete="off">Import</button>
+        <button type="button" class="btn btn-secondary basic-button translate" onclick="presetHelpers.closeImportPresetViewer()">Cancel</button>
     </div>
 @WebUtil.ModalFooter()
 @WebUtil.ModalHeader("add_preset_modal", """<span id="new_preset_modal_title">Create New Preset</span>: <input type="text" id="new_preset_name" placeholder="Preset Name" />""")
@@ -291,19 +291,19 @@
         <p class="translate">Select the checkbox next to inputs you want included in the preset.<br>By default this will override values entirely. For text inputs, use <code>{value}</code> to include the current UI value instead of overriding.</p>
         <div id="new_preset_modal_inputs"></div>
         <div class="advanced_input_checkbox advanced_input_checkbox_presets">
-            <input type="checkbox" id="preset_advanced_options_checkbox" onclick="preset_toggle_advanced()"/>
-            <span class="translate" onclick="preset_toggle_advanced_checkbox_manual()">Display Advanced Options?</span>
+            <input type="checkbox" id="preset_advanced_options_checkbox" onclick="presetHelpers.preset_toggle_advanced()"/>
+            <span class="translate" onclick="presetHelpers.preset_toggle_advanced_checkbox_manual()">Display Advanced Options?</span>
         </div>
         <div id="new_preset_modal_advanced_inputs" style="display:none;"></div>
         <div class="advanced_input_checkbox advanced_input_checkbox_presets">
-            <input type="checkbox" id="preset_hidden_options_checkbox" onclick="preset_toggle_hidden()"/>
-            <span class="translate" onclick="preset_toggle_hidden_checkbox_manual()">Display Normally-Hidden Options?</span>
+            <input type="checkbox" id="preset_hidden_options_checkbox" onclick="presetHelpers.preset_toggle_hidden()"/>
+            <span class="translate" onclick="presetHelpers.preset_toggle_hidden_checkbox_manual()">Display Normally-Hidden Options?</span>
         </div>
         <div id="new_preset_modal_hidden_inputs" style="display:none;"></div>
     </div>
     <div class="modal-footer">
         <span id="new_preset_modal_error" class="modal_error_bottom"></span>
-        <button type="button" class="btn btn-primary basic-button translate" onclick="save_new_preset()">Save</button>
-        <button type="button" class="btn btn-secondary basic-button translate" onclick="close_create_new_preset()">Cancel</button>
+        <button type="button" class="btn btn-primary basic-button translate" onclick="presetHelpers.save_new_preset()">Save</button>
+        <button type="button" class="btn btn-secondary basic-button translate" onclick="presetHelpers.close_create_new_preset()">Cancel</button>
     </div>
 @WebUtil.ModalFooter()
