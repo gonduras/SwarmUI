@@ -72,7 +72,7 @@ public class ScorersExtension : Extension
     public LockObject InitLocker = new();
 
     /// <summary>Does not return until the backend process is ready.</summary>
-    public void EnsureActive()
+    public async Task EnsureActive()
     {
         if (!Directory.Exists($"{FilePath}/venv"))
         {
@@ -80,7 +80,7 @@ public class ScorersExtension : Extension
         }
         while (Status == BackendStatus.LOADING)
         {
-            Task.Delay(TimeSpan.FromSeconds(0.5)).Wait(Program.GlobalProgramCancel);
+            await Task.Delay(TimeSpan.FromSeconds(0.5), Program.GlobalProgramCancel);
         }
         lock (InitLocker)
         {
@@ -115,7 +115,7 @@ public class ScorersExtension : Extension
 
     public async Task<float> DoScore(ImageFile image, string prompt, string scorer)
     {
-        EnsureActive();
+        await EnsureActive();
         JObject result = await DoPost("API/DoScore", new() { ["prompt"] = prompt, ["image"] = image.AsBase64, ["scorer"] = scorer });
         if (result.TryGetValue("log", out JToken ltext))
         {
