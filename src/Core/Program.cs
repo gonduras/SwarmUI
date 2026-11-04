@@ -132,11 +132,6 @@ public class Program
             SettingsFilePath = GetCommandLineFlag("settings_file", $"{DataDir}/Settings.fds");
             LoadSettingsFile();
             RebuildDataDir();
-            // TODO: Legacy format patch from Alpha 0.5! Remove this before 1.0.
-            if (ServerSettings.DefaultUser.FileFormat.ImageFormat == "jpg")
-            {
-                ServerSettings.DefaultUser.FileFormat.ImageFormat = "JPG";
-            }
             // TODO: Legacy patch from Beta 0.9.4.
             if (ServerSettings.IsInstalled && string.IsNullOrWhiteSpace(ServerSettings.InstallDate))
             {
@@ -700,7 +695,7 @@ public class Program
         }
         if (NetworkBackendUtils.NextPort < 1000)
         {
-              Logs.Warning($"BackendStartingPort setting {NetworkBackendUtils.NextPort} is a low-range value (below 1000), which may cause it to conflict with the OS or other programs. You may want to change it.");
+            Logs.Warning($"BackendStartingPort setting {NetworkBackendUtils.NextPort} is a low-range value (below 1000), which may cause it to conflict with the OS or other programs. You may want to change it.");
         }
         WebServer.LogLevel = Enum.Parse<LogLevel>(GetCommandLineFlag("asp_loglevel", "warning"), true);
         SessionHandler.LocalUserID = GetCommandLineFlag("user_id", SessionHandler.LocalUserID);
