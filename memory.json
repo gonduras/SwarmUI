@@ -1,0 +1,7 @@
+{
+  "notes": [
+    "When encountering a discrepancy between a task description's 'Current Code' snippet and the actual code in the repository, always prioritize writing tests against the actual behavior found in the repository, unless instructed otherwise. Use tools like `run_in_bash_session` and `grep`/`cat` to verify the actual implementation first.",
+    "If a prompt includes sample code that conflicts with the real codebase, do not forcibly modify the codebase to match the prompt without explicit confirmation, as doing so may introduce untested regressions or architectural deviations.",
+    "When testing methods parsing data strings (like `data:<mime>;base64,<data>`) that utilize `FreneticExtensions` (e.g., `.After()`, `.Before()`), be aware that if the target token is absent, `.After()` and `.Before()` may return the original string or empty strings rather than throwing exceptions. Ensure your test assertions (like expecting `FormatException` during base64 conversion instead of `ArgumentException` during string splitting) align with this specific extension library's behavior."
+  ]
+}
