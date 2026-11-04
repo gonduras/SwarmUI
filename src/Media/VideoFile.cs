@@ -5,13 +5,19 @@ namespace SwarmUI.Media;
 /// <summary>A video file (eg mp4) containing image data, audio data, metadata, and possibly other sub-streams of data.</summary>
 public class VideoFile : MediaFile
 {
+
     /// <summary>Creates a video object from a web video data URL string.</summary>
     public static VideoFile FromDataString(string data)
     {
-        byte[] raw = Convert.FromBase64String(data.After(";base64,"));
-        string mimeType = data.Before(";base64,").After("data:");
-        return new VideoFile(raw, MediaType.TypesByMimeType.GetValueOrDefault(mimeType) ?? new(mimeType.After('/'), mimeType, MediaMetaType.Video));
+        string[] parts = data.Split(',', 2);
+        if (parts.Length != 2)
+        {
+            throw new ArgumentException("Invalid data string");
+        }
+        string type = parts[0].Split(';', 2)[0].Split(':', 2)[1];
+        return new VideoFile(Convert.FromBase64String(parts[1]), MediaType.TypesByMimeType.GetValueOrDefault(type) ?? new MediaType(type.Split('/')[1], type, MediaMetaType.Video));
     }
+
 
     /// <summary>Creates a video object from a base64 string and media type.</summary>
     public static VideoFile FromBase64(string b64, MediaType type)
